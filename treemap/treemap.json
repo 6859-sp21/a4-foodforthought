@@ -1,0 +1,33 @@
+{
+    "name": "Global GHG Emissions",
+    "children": [
+     {"name": "Non-Food", "value": 74},
+     {"name": "Food",
+       "children": [
+         {"name": "Land Use", 
+         "children": [
+             {"name": "Land use for human food", "value": 2.08}, 
+             {"name": "Land use for livestock", "value": 4.16}
+         ]},
+       {"name": "Crop Production", 
+         "children": [
+             {"name": "Crops for human food", "value": 5.46}, 
+             {"name": "Crops for animal feed", "value": 1.56}
+         ]},
+       {"name": "Livestock and Fisheries", 
+         "children": [
+             {"name": "Wild catch fisheries", "value": 0.26}, 
+             {"name": "Livestock and fish farms", "value": 7.8}
+         ]},
+         {"name": "Supply Chain", 
+           "children": [
+               {"name": "Retail", "value": 0.78}, 
+               {"name": "Packaging", "value": 1.3}, 
+               {"name": "Transport", "value": 1.56}, 
+               {"name": "Food Processing", "value": 1.04}
+           ]}
+        ]
+       }
+    ]
+   }
+   
