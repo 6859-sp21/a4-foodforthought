@@ -320,7 +320,7 @@ function main(o, data) {
 }
 
 if (window.location.hash === "") {
-    d3.json("https://gist.githubusercontent.com/anushreechaudhuri/c528ca8afc0baf0cee65ee255a72c69e/raw/3770f090c336af6a045bad0c57feb0a09c43bc26/test.json", function(err, res) {
+    d3.json("https://raw.githubusercontent.com/6859-sp21/a4-foodforthought/treemap/treemap/treemap.json", function(err, res) {
         if (!err) {
             var data = d3.nest().key(function(d) { return d.category; })
                                 .key(function(d) { return d.subcategory; })
