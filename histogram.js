@@ -1,4 +1,5 @@
 d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/simpleData.csv").then((data) => {
+    console.log(data);
 
     // 1. Sort data.
     data.forEach(d => d.Amount = parseInt(d.Amount, 10));
