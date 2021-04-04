@@ -16,7 +16,7 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/simpleProcessData.
   console.log(subgroups);
 
   // List of groups = species here = value of the first column called group -> I show them on the X axis
-  var groups = d3.map(data, function(d){return(d.food)}).keys();
+  var groups = data.map(d => d.food);
   console.log(groups);
 
   // Add X axis
@@ -30,7 +30,7 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/simpleProcessData.
 
   // Add Y axis
   var y = d3.scaleLinear()
-    .domain([0, 200])
+    .domain([0, d3.max(data, d => d.amount)])
     .range([ height, 0 ]);
   svg.append("g")
     .call(d3.axisLeft(y));
