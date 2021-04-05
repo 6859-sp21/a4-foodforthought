@@ -1,19 +1,20 @@
-d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/simpleData.csv").then((data) => {
+d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").then((data) => {
     console.log(data);
 
     // 1. Sort data.
-    data.forEach(d => d.Amount = parseInt(d.Amount, 10));
-    data.sort((a, b) => a.Amount - b.Amount);
+    data.forEach(d => d.Water = parseInt(d.Water, 10));
+    data.sort((a, b) => a.Water - b.Water);
     const initialData = data.slice(0, 9);
+    var WaterUsed;
 
     // create the drop down menu of cities
 	var selector = d3.select("#chart")
         .append("select")
-        .attr("id", "countrySelector")
+        .attr("id", "EntitySelector")
         .selectAll("option")
         .data(data)
         .enter().append("option")
-        .text(function(d) { return d.Country; })
+        .text(function(d) { return d.Entity; })
         .attr("value", function (d, i) {
             return i;
         });
@@ -21,7 +22,7 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/simpleData.csv").t
     // 2. Setting up variables that describe our chart's space.
     const height = 400;
     const width = 500;;
-    const margin = ({top: 10, right: 10, bottom: 20, left: 20});
+    const margin = ({top: 10, right: 10, bottom: 20, left: 100});
 
     // 3. Create a SVG we will use to make our chart.
     // See https://developer.mozilla.org/en-US/docs/Web/SVG for more on SVGs.
@@ -31,19 +32,19 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/simpleData.csv").t
 
     // 4. Setting up scales.
     const xScale = d3.scaleLinear()
-        .domain([0, d3.max(initialData, d => d.Amount)])
+        .domain([0, d3.max(initialData, d => d.Water)])
         .range([margin.left, width - margin.right])
         .nice();
     
     const yScale = d3.scaleBand()
-        .domain(initialData.map(d => d.Country))
+        .domain(initialData.map(d => d.Entity))
         .range([height - margin.bottom, margin.top])
         .padding(0.1);
 
     const coloring = function(d, selected) {
         console.log(selected);
-        console.log(d.Country);
-        if (d.Country == selected) {
+        console.log(d.Entity);
+        if (d.Entity == selected) {
             return '#ff8769';
         }
         return '#65d5db';
@@ -68,7 +69,7 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/simpleData.csv").t
                     //     .attr('font-weight', 'bold')
                     //     .attr('x', width - margin.right)
                     //     .attr('y', -10)
-                    //     .text('Amount');
+                    //     .text('Water');
 
     //7. Drawing our y-axis
     const yAxis = svg.append('g')
@@ -82,7 +83,7 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/simpleData.csv").t
         //     .attr('fill', 'black')
         //     .attr('font-size', '12px')
         //     .attr('font-weight', 'bold')
-        //     .text('Country');
+        //     .text('Entity');
         
     //8.  Adding a background label for the year.
     // const yearLabel = svg.append('text')
@@ -94,16 +95,26 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/simpleData.csv").t
     //     .attr('font-size', 80)
     //     .text(year);
 
+    const yearLabel = svg.append('text')
+        .attr('text-align', 'right')
+        .attr('x', width - margin.right - 200)
+        .attr('y', height - margin.bottom - 20)
+        .attr('fill', '#ccc')
+        .attr('font-family', 'Helvetica Neue, Arial')
+        .attr('font-weight', 500)
+        .attr('font-size', 80)
+        .text(WaterUsed);
+
     const updateBars = function(data, selected) {
         // First update the y-axis domain to match data
         // console.log("11111111111111");
         console.log(data);
-        console.log(d3.max(data, d => d.Amount));
-        // console.log(data.map(d => d.Country));
-        xScale.domain([0, d3.max(data, d => d.Amount)]);
+        console.log(d3.max(data, d => d.Water));
+        // console.log(data.map(d => d.Entity));
+        xScale.domain([0, d3.max(data, d => d.Water)]);
         xAxis.transition().duration(1000).call(d3.axisBottom(xScale))
 
-        yScale.domain(data.map(d => d.Country));
+        yScale.domain(data.map(d => d.Entity));
         yAxis.transition().duration(1000).call(d3.axisLeft(yScale));
         
         //xAxisHandleForUpdate.call(xAxis);
@@ -116,15 +127,15 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/simpleData.csv").t
           .append("rect")
             .attr("class", "bar")
             .attr('x', margin.left)
-            .attr('y', d => yScale(d.Country))
-            .attr('width', d => xScale(d.Amount) - margin.left)
+            .attr('y', d => yScale(d.Entity))
+            .attr('width', d => xScale(d.Water) - margin.left)
             .attr('height', yScale.bandwidth())
             .attr('fill', d => coloring(d, selected))
             .on("mouseover", function(event, d) {
                 tooltip.transition()
                 .duration(200)
                 .style("opacity", .9);
-                tooltip.html("Country: " + d.Country + "<br/> Amount: " + d.Amount)
+                tooltip.html("Entity: " + d.Entity + "<br/> Water: " + d.Water)
                 .style("left", (event.pageX) + "px")
                 .style("background", 'white')
                 .style("top", (event.pageY - 28) + "px");
@@ -143,20 +154,26 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/simpleData.csv").t
         bars
             .transition().duration(250)
             .attr('x', margin.left)
-            .attr('y', d => yScale(d.Country))
-            .attr('width', d => xScale(d.Amount) - margin.left)
+            .attr('y', d => yScale(d.Entity))
+            .attr('width', d => xScale(d.Water) - margin.left)
             .attr('height', yScale.bandwidth())
             .attr('fill', d => coloring(d, selected))
 
         // Remove old ones
         bars.exit().remove();
+
+        yearLabel
+            .text(WaterUsed)
+            .transition()
+            .duration(1000)
     };
 
     const update = function() {
         const n = data.length;
         const index = parseInt(d3.select(this).property('value'), 10);
         var start, end;
-        const selctedCountry = data[index].Country;
+        const selctedEntity = data[index].Entity;
+        WaterUsed = data[index].Water;
         if (index < 4) {
             start = 0;
             end = 9;
@@ -168,10 +185,10 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/simpleData.csv").t
             end = index + 5;
         }
         const newData = data.slice(start, end);
-        updateBars(newData, selctedCountry);
+        updateBars(newData, selctedEntity);
     };
 
-    d3.select("#countrySelector")
+    d3.select("#EntitySelector")
         .on("change", update);
 
     updateBars(initialData);
