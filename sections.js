@@ -30,16 +30,18 @@ const margin = {left: 170, top: 50, bottom: 50, right: 20}
 const width = 900 - margin.left - margin.right
 const height = 850 - margin.top - margin.bottom
 
+d3.select("#vis")
+    .append('svg')
+    .attr('width', width)
+    .attr('height', height)
+    .attr('opacity', 1)
 
 drawInitial();
 
 function drawInitial() {
+    let svg = d3.select('#vis').select('svg')
+
     console.log('hello world')
-    let svg = d3.select("#vis")
-        .append('svg')
-        .attr('width', width)
-        .attr('height', height)
-        .attr('opacity', 1)
 
     d3.json("https://gist.githubusercontent.com/sauhaardac/11a605b1291add372ab77cff7044353f/raw/281e2d8a8ea91ce1afa7224717db07b3d94a2d1f/commodities.json").then((data) => {
             const x_min = -5, x_max = 15;
@@ -54,10 +56,11 @@ function drawInitial() {
                 .data(Object.keys(data))
                 .enter()
                 .append('a')
+                .attr('class', 'graph-button')
                 .text((d) => d)
                 .append('input')
                 .attr('type', 'checkbox')
-                .attr('class', 'button-check')
+                .attr('class', 'graph-button')
                 .attr('id', (d) => d.replace(/\s/g, ''))
                 .on('change', update)
                 .property('checked', true);
@@ -66,7 +69,7 @@ function drawInitial() {
 
 
             function update() {
-                clean();
+                svg.html("");
                 const newData = Object.keys(data)
                     .filter(key => d3.select("#" + key.replace(/\s/g, '')).property("checked"))
                     .reduce((obj, key) => {
@@ -142,6 +145,7 @@ function drawInitial() {
 function clean() {
     let svg = d3.select('#vis').select('svg')
     svg.html("");
+    d3.selectAll('.graph-button').remove()
 }
 
 //First draw function
