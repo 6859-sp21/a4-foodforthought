@@ -1,10 +1,11 @@
 d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").then((data) => {
-    console.log(data);
-
     // 1. Sort data.
     data.forEach(d => d.Water = parseInt(d.Water, 10));
-    data.sort((a, b) => a.Water - b.Water);
+    data.sort((a, b) => b.Water - a.Water);
+    console.log(data);
+    data.forEach((d, i) => d.Entity = `${i + 1}. ${d.Entity}`);
     const initialData = data.slice(0, 9);
+    console.log(initialData);
     var WaterUsed;
 
     // create the drop down menu of cities
@@ -42,8 +43,6 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").
         .padding(0.1);
 
     const coloring = function(d, selected) {
-        console.log(selected);
-        console.log(d.Entity);
         if (d.Entity == selected) {
             return '#ff8769';
         }
@@ -85,19 +84,10 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").
         //     .attr('font-weight', 'bold')
         //     .text('Entity');
         
-    //8.  Adding a background label for the year.
-    // const yearLabel = svg.append('text')
-    //     .attr('x', 40)
-    //     .attr('y', height - margin.bottom - 20)
-    //     .attr('fill', '#ccc')
-    //     .attr('font-family', 'Helvetica Neue, Arial')
-    //     .attr('font-weight', 500)
-    //     .attr('font-size', 80)
-    //     .text(year);
-
+    //8.  Adding a background label for the number.
     const yearLabel = svg.append('text')
-        .attr('text-align', 'right')
-        .attr('x', width - margin.right - 200)
+        .attr("text-anchor", "end")
+        .attr('x', width - margin.right)
         .attr('y', height - margin.bottom - 20)
         .attr('fill', '#ccc')
         .attr('font-family', 'Helvetica Neue, Arial')
@@ -107,10 +97,6 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").
 
     const updateBars = function(data, selected) {
         // First update the y-axis domain to match data
-        // console.log("11111111111111");
-        console.log(data);
-        console.log(d3.max(data, d => d.Water));
-        // console.log(data.map(d => d.Entity));
         xScale.domain([0, d3.max(data, d => d.Water)]);
         xAxis.transition().duration(1000).call(d3.axisBottom(xScale))
 
@@ -122,7 +108,6 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").
         const bars = svg.selectAll(".bar").data(data);
 
         // Add bars for new data
-        console.log(data);
         bars.enter()
           .append("rect")
             .attr("class", "bar")
