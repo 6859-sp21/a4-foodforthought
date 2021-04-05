@@ -30,161 +30,107 @@ const margin = {left: 170, top: 50, bottom: 50, right: 20}
 const width = 1000 - margin.left - margin.right
 const height = 950 - margin.top - margin.bottom
 
-//Read Data, convert numerical categories into floats
-//Create the initial visualisation
-
-
-d3.csv('data/recent-grads.csv', function (d) {
-    return {
-        Major: d.Major,
-        Total: +d.Total,
-        Men: +d.Men,
-        Women: +d.Women,
-        Median: +d.Median,
-        Unemployment: +d.Unemployment_rate,
-        Category: d.Major_category,
-        ShareWomen: +d.ShareWomen,
-        HistCol: +d.Histogram_column,
-        Midpoint: +d.midpoint
-    };
-}).then(data => {
-    dataset = data
-    console.log(dataset)
-    createScales()
-    setTimeout(drawInitial(), 100)
-})
-
-const colors = ['#ffcc00', '#ff6666', '#cc0066', '#66cccc', '#f688bb', '#65587f', '#baf1a1', '#333333', '#75b79e', '#66cccc', '#9de3d0', '#f1935c', '#0c7b93', '#eab0d9', '#baf1a1', '#9399ff']
-
-//Create all the scales and save to global variables
-
-function createScales() {
-    salarySizeScale = d3.scaleLinear(d3.extent(dataset, d => d.Median), [5, 35])
-    salaryXScale = d3.scaleLinear(d3.extent(dataset, d => d.Median), [margin.left, margin.left + width + 250])
-    salaryYScale = d3.scaleLinear([20000, 110000], [margin.top + height, margin.top])
-    categoryColorScale = d3.scaleOrdinal(categories, colors)
-    shareWomenXScale = d3.scaleLinear(d3.extent(dataset, d => d.ShareWomen), [margin.left, margin.left + width])
-    enrollmentScale = d3.scaleLinear(d3.extent(dataset, d => d.Total), [margin.left + 120, margin.left + width - 50])
-    enrollmentSizeScale = d3.scaleLinear(d3.extent(dataset, d => d.Total), [10, 60])
-    histXScale = d3.scaleLinear(d3.extent(dataset, d => d.Midpoint), [margin.left, margin.left + width])
-    histYScale = d3.scaleLinear(d3.extent(dataset, d => d.HistCol), [margin.top + height, margin.top])
-}
-
-function createLegend(x, y) {
-    let svg = d3.select('#legend')
-
-    svg.append('g')
-        .attr('class', 'categoryLegend')
-        .attr('transform', `translate(${x},${y})`)
-
-    categoryLegend = d3.legendColor()
-        .shape('path', d3.symbol().type(d3.symbolCircle).size(150)())
-        .shapePadding(10)
-        .scale(categoryColorScale)
-
-    d3.select('.categoryLegend')
-        .call(categoryLegend)
-}
-
-function createSizeLegend() {
-    let svg = d3.select('#legend2')
-    svg.append('g')
-        .attr('class', 'sizeLegend')
-        .attr('transform', `translate(100,50)`)
-
-    sizeLegend2 = d3.legendSize()
-        .scale(salarySizeScale)
-        .shape('circle')
-        .shapePadding(15)
-        .title('Salary Scale')
-        .labelFormat(d3.format("$,.2r"))
-        .cells(7)
-
-    d3.select('.sizeLegend')
-        .call(sizeLegend2)
-}
-
-function createSizeLegend2() {
-    let svg = d3.select('#legend3')
-    svg.append('g')
-        .attr('class', 'sizeLegend2')
-        .attr('transform', `translate(50,100)`)
-
-    sizeLegend2 = d3.legendSize()
-        .scale(enrollmentSizeScale)
-        .shape('circle')
-        .shapePadding(55)
-        .orient('horizontal')
-        .title('Enrolment Scale')
-        .labels(['1000', '200000', '400000'])
-        .labelOffset(30)
-        .cells(3)
-
-    d3.select('.sizeLegend2')
-        .call(sizeLegend2)
-}
-
-// All the initial elements should be create in the drawInitial function
-// As they are required, their attributes can be modified
-// They can be shown or hidden using their 'opacity' attribute
-// Each element should also have an associated class name for easy reference
-
 function drawInitial() {
-    createSizeLegend()
-    createSizeLegend2()
-
     let svg = d3.select("#vis")
         .append('svg')
         .attr('width', 1000)
         .attr('height', 950)
         .attr('opacity', 1)
 
-    let xAxis = d3.axisBottom(salaryXScale)
-        .ticks(4)
-        .tickSize(height + 80)
+    d3.json("https://gist.githubusercontent.com/sauhaardac/11a605b1291add372ab77cff7044353f/raw/281e2d8a8ea91ce1afa7224717db07b3d94a2d1f/commodities.json").then((data) => {
 
-    let xAxisGroup = svg.append('g')
-        .attr('class', 'first-axis')
-        .attr('transform', 'translate(0, 0)')
-        .call(xAxis)
-        .call(g => g.select('.domain')
-            .remove())
-        .call(g => g.selectAll('.tick line'))
-        .attr('stroke-opacity', 0.2)
-        .attr('stroke-dasharray', 2.5)
+            const svg = d3.select('#viz').append('svg').attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+            var x = d3.scaleLinear()
+                .domain([x_min, x_max])
+                .range([0, width]);
+            var kde = kernelDensityEstimator(kernelEpanechnikov(1), x.ticks(100))
 
-    // Instantiates the force simulation
-    // Has no forces. Actual forces are added and removed as required
+            var colorScale = d3.scaleOrdinal(d3.schemeTableau10).domain(Object.keys(data))
 
-    simulation = d3.forceSimulation(dataset)
+            d3.select('#controls').selectAll('input')
+                .data(Object.keys(data))
+                .enter()
+                .append('a')
+                .text((d) => d)
+                .append('input')
+                .attr('type', 'checkbox')
+                .attr('id', (d) => d.replace(/\s/g, ''))
+                .on('change', update)
+                .property('checked', true);
 
-    // Define each tick of simulation
-    simulation.on('tick', () => {
-        nodes
-            .attr('cx', d => d.x)
-            .attr('cy', d => d.y)
-    })
+            update();
 
-    // Stop the simulation until later
-    simulation.stop()
 
-    // Selection of all the circles 
-    nodes = svg
-        .selectAll('circle')
-        .data(dataset)
-        .enter()
-        .append('circle')
-        .attr('fill', 'black')
-        .attr('r', 3)
-        .attr('cx', (d, i) => salaryXScale(d.Median) + 5)
-        .attr('cy', (d, i) => i * 5.2 + 30)
-        .attr('opacity', 0.8)
+            function update() {
+                d3.select("svg").html("");
+                const newData = Object.keys(data)
+                    .filter(key => d3.select("#" + key.replace(/\s/g, '')).property("checked"))
+                    .reduce((obj, key) => {
+                        obj[key] = data[key];
+                        return obj;
+                    }, {});
 
-    // Add mouseover and mouseout events for all circles
-    // Changes opacity and adds border
-    svg.selectAll('circle')
-        .on('mouseover', mouseOver)
-        .on('mouseout', mouseOut)
+                const used_commodities = Object.keys(newData);
+                const num_commodities = Object.keys(newData).length;
+                var comm_num = 0;
+
+                for (var comm of Object.keys(newData)) {
+                    console.log(`Commodity (#${comm_num}) = ${comm}`);
+                    indicator = newData[comm];
+
+                    var density = [[x_min, 0]];
+                    density = density.concat(kde(indicator.map((d) => d)))
+                    density = density.concat([[x_max, 0]])
+
+
+                    var y = d3.scaleLinear()
+                        .range([(comm_num + 1) * height / num_commodities, (comm_num) * height / num_commodities])
+                        .domain([0, 1.5 * d3.max(density, (d) => d[1])]);
+
+
+                    if (comm_num === num_commodities - 1) {
+                        svg.append("g")
+                            .attr("transform", "translate(0," + (comm_num + 1) * height / num_commodities + ")")
+                            .call(d3.axisBottom(x));
+                    } else {
+                        svg.append("g")
+                            .attr("transform", "translate(0," + (comm_num + 1) * height / num_commodities + ")")
+                            .call(d3.axisBottom(x).tickSize(0).tickValues([]));
+                    }
+                    svg.append("g")
+                        .attr("transform", "translate(" + x(0) + ", 0)")
+                        .call(d3.axisLeft(y).tickSize(0).tickValues([]));
+
+                    // Plot the area
+                    var curve = svg
+                        .append('g')
+                        .append("path")
+                        .attr("class", "mypath")
+                        .datum(density)
+                        .attr("fill", colorScale(comm))
+                        .attr("opacity", "0.8")
+                        .attr("stroke", "#000")
+                        .attr("stroke-width", 1)
+                        .attr("stroke-linejoin", "round")
+                        .attr("d", d3.line()
+                            .curve(d3.curveBasis)
+                            .x(function (d) {
+                                return x(d[0]);
+                            })
+                            .y(function (d) {
+                                return y(d[1]);
+                            })
+                        ).attr('opacity', 0);
+
+                    curve.transition().duration(300).ease(d3.easeLinear).attr('opacity', 1)
+
+                    comm_num += 1;
+                }
+
+            }
+        }
+    );
 }
 
 //Cleaning Function
