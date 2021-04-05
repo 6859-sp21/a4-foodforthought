@@ -7,7 +7,7 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/simpleData.csv").t
     const initialData = data.slice(0, 9);
 
     // create the drop down menu of cities
-	var selector = d3.select("body")
+	var selector = d3.select("#chart")
         .append("select")
         .attr("id", "countrySelector")
         .selectAll("option")
@@ -178,3 +178,12 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/simpleData.csv").t
 
     document.getElementById("chart").appendChild(svg.node());
     });
+
+    function show() {
+        var x = document.getElementById("chart");
+        if (x.style.display === "none") {
+          x.style.display = "block";
+        } else {
+          x.style.display = "none";
+        }
+      }
