@@ -27,20 +27,22 @@ const categoriesXY = {
 }
 
 const margin = {left: 170, top: 50, bottom: 50, right: 20}
-const width = 1000 - margin.left - margin.right
-const height = 950 - margin.top - margin.bottom
+const width = 900 - margin.left - margin.right
+const height = 850 - margin.top - margin.bottom
+
+
+drawInitial();
 
 function drawInitial() {
+    console.log('hello world')
     let svg = d3.select("#vis")
         .append('svg')
-        .attr('width', 1000)
-        .attr('height', 950)
+        .attr('width', width)
+        .attr('height', height)
         .attr('opacity', 1)
 
     d3.json("https://gist.githubusercontent.com/sauhaardac/11a605b1291add372ab77cff7044353f/raw/281e2d8a8ea91ce1afa7224717db07b3d94a2d1f/commodities.json").then((data) => {
-
-            const svg = d3.select('#viz').append('svg').attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
+            const x_min = -5, x_max = 15;
             var x = d3.scaleLinear()
                 .domain([x_min, x_max])
                 .range([0, width]);
@@ -48,13 +50,14 @@ function drawInitial() {
 
             var colorScale = d3.scaleOrdinal(d3.schemeTableau10).domain(Object.keys(data))
 
-            d3.select('#controls').selectAll('input')
+            d3.select('#vis').selectAll('input')
                 .data(Object.keys(data))
                 .enter()
                 .append('a')
                 .text((d) => d)
                 .append('input')
                 .attr('type', 'checkbox')
+                .attr('class', 'button-check')
                 .attr('id', (d) => d.replace(/\s/g, ''))
                 .on('change', update)
                 .property('checked', true);
@@ -63,7 +66,7 @@ function drawInitial() {
 
 
             function update() {
-                d3.select("svg").html("");
+                clean();
                 const newData = Object.keys(data)
                     .filter(key => d3.select("#" + key.replace(/\s/g, '')).property("checked"))
                     .reduce((obj, key) => {
@@ -136,36 +139,15 @@ function drawInitial() {
 //Cleaning Function
 //Will hide all the elements which are not necessary for a given chart type 
 
-function clean(chartType) {
+function clean() {
     let svg = d3.select('#vis').select('svg')
-    if (chartType !== "isScatter") {
-        svg.select('.scatter-x').transition().attr('opacity', 0)
-        svg.select('.scatter-y').transition().attr('opacity', 0)
-        svg.select('.best-fit').transition().duration(200).attr('opacity', 0)
-    }
-    if (chartType !== "isMultiples") {
-        svg.selectAll('.lab-text').transition().attr('opacity', 0)
-            .attr('x', 1800)
-        svg.selectAll('.cat-rect').transition().attr('opacity', 0)
-            .attr('x', 1800)
-    }
-    if (chartType !== "isFirst") {
-        svg.select('.first-axis').transition().attr('opacity', 0)
-        svg.selectAll('.small-text').transition().attr('opacity', 0)
-            .attr('x', -200)
-    }
-    if (chartType !== "isHist") {
-        svg.selectAll('.hist-axis').transition().attr('opacity', 0)
-    }
-    if (chartType !== "isBubble") {
-        svg.select('.enrolment-axis').transition().attr('opacity', 0)
-    }
+    svg.html("");
 }
 
 //First draw function
 
 function draw1() {
-
+    clean();
 }
 
 
@@ -173,7 +155,11 @@ function draw1() {
 //Will be called from the scroller functionality
 
 let activationFunctions = [
+    drawInitial,
     draw1,
+    draw1,
+    draw1,
+    draw1
 ]
 
 //All the scrolling function
@@ -182,6 +168,7 @@ let activationFunctions = [
 
 let scroll = scroller()
     .container(d3.select('#graphic'))
+
 scroll()
 
 let lastIndex, activeIndex = 0
@@ -208,3 +195,19 @@ scroll.on('progress', function (index, progress) {
 
     }
 })
+
+function kernelDensityEstimator(kernel, X) {
+    return function (V) {
+        return X.map(function (x) {
+            return [x, d3.mean(V, function (v) {
+                return kernel(x - v);
+            })];
+        });
+    };
+}
+
+function kernelEpanechnikov(k) {
+    return function (v) {
+        return Math.abs(v /= k) <= 1 ? 0.75 * (1 - v * v) / k : 0;
+    };
+}
