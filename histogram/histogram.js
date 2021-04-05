@@ -85,10 +85,10 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").
         //     .text('Entity');
         
     //8.  Adding a background label for the number.
-    const yearLabel = svg.append('text')
+    const numberLabel = svg.append('text')
         .attr("text-anchor", "end")
         .attr('x', width - margin.right)
-        .attr('y', height - margin.bottom - 20)
+        .attr('y', margin.top + 60)
         .attr('fill', '#ccc')
         .attr('font-family', 'Helvetica Neue, Arial')
         .attr('font-weight', 500)
@@ -97,6 +97,7 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").
 
     const updateBars = function(data, selected) {
         // First update the y-axis domain to match data
+        console.log(data);
         xScale.domain([0, d3.max(data, d => d.Water)]);
         xAxis.transition().duration(1000).call(d3.axisBottom(xScale))
 
@@ -105,7 +106,9 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").
         
         //xAxisHandleForUpdate.call(xAxis);
 
-        const bars = svg.selectAll(".bar").data(data);
+        const bars = svg
+            .selectAll(".bar")
+            .data(data)
 
         // Add bars for new data
         bars.enter()
@@ -120,7 +123,7 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").
                 tooltip.transition()
                 .duration(200)
                 .style("opacity", .9);
-                tooltip.html("Entity: " + d.Entity + "<br/> Water: " + d.Water)
+                tooltip.html("Food: " + d.Entity + "<br/> Water: " + d.Water)
                 .style("left", (event.pageX) + "px")
                 .style("background", 'white')
                 .style("top", (event.pageY - 28) + "px");
@@ -147,7 +150,7 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").
         // Remove old ones
         bars.exit().remove();
 
-        yearLabel
+        numberLabel
             .text(WaterUsed)
             .transition()
             .duration(1000)
