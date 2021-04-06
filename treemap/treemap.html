@@ -74,8 +74,13 @@ rect.parent {
 <script src="https://code.jquery.com/jquery-1.7.2.min.js"></script>
 <script src="https://d3js.org/d3.v3.min.js"></script>
 <script>
+  d3v3 = d3
+  window.d3 = null
+</script>
+<!-- <script src="https://d3js.org/d3.v6.min.js"></script> -->
+<script>
 
-
+console.log(d3v3);
 window.addEventListener('message', function(e) {
     var opts = e.data.opts,
         data = e.data.data;
@@ -95,7 +100,7 @@ var defaults = {
 function main(o, data) {
   var root,
       opts = $.extend(true, {}, defaults, o),
-      formatNumber = d3.format(".2f"),
+      formatNumber = d3v3.format(".2f"),
       rname = opts.rootname,
       margin = opts.margin,
       theight = 36 + 16;
@@ -105,23 +110,23 @@ function main(o, data) {
       height = opts.height - margin.top - margin.bottom - theight,
       transitioning;
   
-  var color = d3.scale.category20c();
+  var color = d3v3.scale.category20c();
   
-  var x = d3.scale.linear()
+  var x = d3v3.scale.linear()
       .domain([0, width])
       .range([0, width]);
   
-  var y = d3.scale.linear()
+  var y = d3v3.scale.linear()
       .domain([0, height])
       .range([0, height]);
   
-  var treemap = d3.layout.treemap()
+  var treemap = d3v3.layout.treemap()
       .children(function(d, depth) { return depth ? null : d._children; })
       .sort(function(a, b) { return a.value - b.value; })
       .ratio(height / width * 0.5 * (1 + Math.sqrt(5)))
       .round(false);
   
-  var svg = d3.select("#chart").append("svg")
+  var svg = d3v3.select("#chart").append("svg")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.bottom + margin.top)
       .style("margin-left", -margin.left + "px")
@@ -319,13 +324,16 @@ function main(o, data) {
   }
 }
 
+
+
+
 if (window.location.hash === "") {
-    d3.json("https://raw.githubusercontent.com/6859-sp21/a4-foodforthought/treemap/treemap/treemap.json", function(err, res) {
+    d3v3.json("https://raw.githubusercontent.com/6859-sp21/a4-foodforthought/treemap/treemap/treemap.json", function(err, res) {
         if (!err) {
-            var data = d3.nest().key(function(d) { return d.category; })
+            var data = d3v3.nest().key(function(d) { return d.category; })
                                 .key(function(d) { return d.subcategory; })
                                 .entries(res);
-            console.log(data);
+
             main({title: "Food Contributes Close to a Third of Global GHG Emissions"}, {key: "Global GHG Emissions", values: data});
         }
     });
