@@ -3,6 +3,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
+    <script src="https://code.jquery.com/jquery-1.7.2.min.js"></script>
+
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script>
+        d3v3 = d3
+        window.d3 = null
+    </script>
     <script src="https://d3js.org/d3.v6.js"></script>
 
     <meta property='og:title' content='Best College Majors'/>
@@ -14,6 +21,60 @@
 
 
     <title>Best College Majors</title>
+
+    <style>
+
+        .title {
+            font-weight: bold;
+            font-size: 24px;
+            text-align: center;
+            margin-top: 6px;
+            margin-bottom: 6px;
+        }
+        /*text {*/
+        /*    pointer-events: none;*/
+        /*}*/
+
+        /*.grandparent text {*/
+        /*    font-weight: bold;*/
+        /*}*/
+
+        rect {
+            stroke: #fff;
+        }
+
+
+        rect.parent,
+        .grandparent rect {
+            stroke-width: 2px;
+        }
+
+        rect.parent {
+            pointer-events: none;
+        }
+
+        .grandparent rect {
+            fill: orange;
+        }
+
+        .grandparent:hover rect {
+            fill: #ee9700;
+        }
+
+        .children rect.parent,
+        .grandparent rect {
+            cursor: pointer;
+        }
+
+        .children rect.parent {
+            fill: #bbb;
+            fill-opacity: .5;
+        }
+
+        .children:hover rect.child {
+            fill: #bbb;
+        }
+    </style>
 </head>
 
 
@@ -32,100 +93,21 @@
             <p>By Raunak, Anushree, and Yuebin</a></p>
             <p>(Note: If the visualisation doesn't fit your screen, try zooming out with ctrl + - / Cmd + -.) </p>
             <p>
-                This is a piece of text describing the visualization to the right. Isn't it incredible? I know right :))
+                We often think about our transportation, electricity, and energy use as the main contributors to global greenhouse gas emissions. However, food production and consumption make up nearly a third of global emissions and also contribute significantly to land and water use.
             </p>
 
         </section>
         <section class="step">
             <p>
-                Here, we have clustered the majors based on the broader category, of which there are 16 in total. The
-                size
-                of the bubbles represent the median salary of graduates from the major.
-
-                When sorted like this, it's quite clear that engineering majors of all kinds have generally
-                above-average median salaries. <br><br>
-                On the other end, it appears that majors in the field of psychology on average have the lowest graduate
-                salaries. <br>
+                In addition to drinking beverages, your diet is consuming freshwater through food production. How much water do these products use? You can find the answer by selecting your proteins and see the freshwater withdrawal in terms of nutritional units.
             </p>
             <svg id='legend' width='400px' height='500px'></svg>
         </section>
         <section class='step'>
             <svg id='legend2' width='400px' height='450px'></svg>
             <br><br>
-            Bear in mind that some of these figures may suffer from small sample sizes. If you hover over a bubble, you
-            can see additional information,
-            including the number of students enrolled in a given major. Salary figures from degrees with lower
-            enrolment may be less accurate due to the smaller pool of student respondents
+            But how can you understand the environmental impacts of your own diet? Select your most commonly eaten proteins on the right to find out where the distribution of GHG emissions from your diet lies.
         </section>
-        <section class="step">
-            <br><br><br><br><br><br>
-            <p>
-                If we rearrange all the data points into a histogram format, the salary potential of engineering majors
-                becomes
-                even more stark, as almost all the points on the right of the graph are colored yellow, for engineering.
-                As for all the
-                other majors, they follow a fairly diverse yet tightly spaced distribution, with the modal class being
-                salaries between $34,000 and $36,000.
-            </p>
-
-        </section>
-        <section class="step">
-
-            <p>
-            <h2>Does Gender Influence Chosen Majors?</h2>
-            Now what if we took those same categories, but coloured them based on the proportion of the students which
-            are male or female?
-            In this chart, blue represents majors with > 60% male, and red represents > 60% female, and the grey bubbles
-            represent the more gender
-            balanced courses.
-            <br><br>(Hover over the labels if you've forgotten the category)<br><br>
-
-            What is striking about this graphic is that almost every category grouping of majors are either decidedly
-            more female-weighted or male-weighted,
-            with the exception of perhaps the business and physical sciences majors.
-            </p>
-
-        </section>
-        <section class="step">
-            When we plot the % of students in a major being female against the median salary of students in the major, a
-            fairly clear trend emerges.
-            It appears that majors with a higher proportion of male students also produce students with higher median
-            wages. <br><br> In fact, a linear model
-            would predict that for every added percentage of female students in a given major, the median annual salary
-            drops by $306 USD.
-        </section>
-        <section class="step">
-            So we've seen the most 'profitable' majors, as well as the ones with the most uneven gender distributions.
-            But what are students
-            actually enrolling in the most frequently? What can enrolment numbers tell us about actual interest in each
-            major? This chart has the bubbles
-            sized based on the number of students enrolled in each major, and coloured by category.
-            <svg id='legend3' width='400px' height='350px'></svg>
-            Psychology is the clear leader in this regard, with over 390,000 students enrolled. Business related topics
-            such as general business, business management,
-            accounting and finance are all also heavily enrolled.
-        </section>
-        <section class="step">
-            <h1>The End</h1>
-            <p>
-                Hopefully, this has helped you in deciding what major you hope to study. If you want to take a deeper
-                look into the data for yourself, you can download
-                all the csv files <a
-                    href='https://www.kaggle.com/fivethirtyeight/fivethirtyeight-college-majors-dataset'>here</a>.
-                <br><br>
-                Special thanks to Jim Vallandingham for his article on <a href='https://vallandingham.me/scroller.html'>creating
-                scrolling visualisations using D3.js</a>. All
-                of the code associated with this project can be found on its <a
-                    href='https://github.com/cuthchow/college-majors-visualisation'>Github page</a>.
-                <br><br>
-                I've also produced a full write-up of how I made this <a
-                    href='https://towardsdatascience.com/how-i-created-an-interactive-scrolling-visualisation-with-d3-js-and-how-you-can-too-e116372e2c73'>over
-                at my blog</a>.
-            </p>
-            <span></span><span></span><span></span>
-        </section>
-
-
     </div>
     <div id="vis">
 
