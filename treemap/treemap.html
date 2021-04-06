@@ -332,6 +332,9 @@ if (window.location.hash === "") {
       var data = d3.nest().key(function(d) { return d.category; })
                                 .key(function(d) { return d.subcategory; })
                                 .entries(res);
+            var data = d3.nest().key(function(d) { return d.category; })
+            .key(function(d) { return d.subcategory; })
+            .entries(res);
             console.log(data);
             main({title: "Food Contributes Close to a Third of Global GHG Emissions"}, {key: "Global GHG Emissions", values: data});
     })
