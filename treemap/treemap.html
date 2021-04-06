@@ -9,6 +9,7 @@ Generic treemap, based on http://bost.ocks.org/mike/treemap/
 <title>Breakdown of Global GHG Emissions</title>
 <style>
 
+
 #chart {
   background: #fff;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -72,14 +73,19 @@ rect.parent {
 <div id="chart"></div>
 
 <script src="https://code.jquery.com/jquery-1.7.2.min.js"></script>
-<script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="https://d3js.org/d3.v6.min.js"></script>
+<script src="https://d3js.org/d3-collection.v1.min.js"></script>
+<script src="https://d3js.org/d3-hierarchy.v2.min.js"></script>
+
+<button type="button" onclick="Disappear()">Disappear</button>
+
 <script>
 
 
 window.addEventListener('message', function(e) {
     var opts = e.data.opts,
         data = e.data.data;
-
+    console.log("hello");
     return main(opts, data);
 });
 
@@ -105,21 +111,21 @@ function main(o, data) {
       height = opts.height - margin.top - margin.bottom - theight,
       transitioning;
   
-  var color = d3.scale.category20c();
+  var color = d3.schemeTableau10;
   
-  var x = d3.scale.linear()
+  var x = d3.scaleLinear()
       .domain([0, width])
       .range([0, width]);
   
-  var y = d3.scale.linear()
+  var y = d3.scaleLinear()
       .domain([0, height])
       .range([0, height]);
   
-  var treemap = d3.layout.treemap()
-      .children(function(d, depth) { return depth ? null : d._children; })
-      .sort(function(a, b) { return a.value - b.value; })
-      .ratio(height / width * 0.5 * (1 + Math.sqrt(5)))
-      .round(false);
+  var treemap = d3.treemap().tile(d3.treemapResquarify).size([width, height]).round(true).paddingInner(1);
+      // .children(function(d, depth) { return depth ? null : d._children; })
+      // .sort(function(a, b) { return a.value - b.value; })
+      // .ratio(height / width * 0.5 * (1 + Math.sqrt(5)))
+      // .round(false);
   
   var svg = d3.select("#chart").append("svg")
       .attr("width", width + margin.left + margin.right)
@@ -189,7 +195,6 @@ function main(o, data) {
   // coordinates. This lets us use a viewport to zoom.
   function layout(d) {
     if (d._children) {
-      treemap.nodes({_children: d._children});
       d._children.forEach(function(c) {
         c.x = d.x + c.x * d.dx;
         c.y = d.y + c.y * d.dy;
@@ -320,15 +325,25 @@ function main(o, data) {
 }
 
 if (window.location.hash === "") {
-    d3.json("https://raw.githubusercontent.com/6859-sp21/a4-foodforthought/treemap/treemap/treemap.json", function(err, res) {
-        if (!err) {
-            var data = d3.nest().key(function(d) { return d.category; })
+    d3.json("https://raw.githubusercontent.com/6859-sp21/a4-foodforthought/treemap/treemap/treemap.json")
+    .then((res) => {
+      console.log('Data Collected!')
+      // var data = d3.group(res, d=>d.category, d=>d.subcategory);
+      var data = d3.nest().key(function(d) { return d.category; })
                                 .key(function(d) { return d.subcategory; })
                                 .entries(res);
             console.log(data);
             main({title: "Food Contributes Close to a Third of Global GHG Emissions"}, {key: "Global GHG Emissions", values: data});
-        }
-    });
+    })
+}
+
+var Disappear = function(){
+  var svg = d3.select("#chart").select("svg")
+
+  svg.html("");
+  // console.log('Button Click');
+  // svg
+  //   .style("fill", white)
 }
 </script>
 </body>
