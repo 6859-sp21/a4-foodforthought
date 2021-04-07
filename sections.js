@@ -161,6 +161,7 @@ function clean() {
     svg.html("");
     d3.selectAll('.graph-button').remove()
     d3.selectAll('#EntitySelector').remove()
+    d3.selectAll('.tooltip').remove()
 }
 
 //First draw function
