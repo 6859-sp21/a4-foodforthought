@@ -23,7 +23,7 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").
     // 2. Setting up variables that describe our chart's space.
     const height = 400;
     const width = 500;;
-    const margin = ({top: 10, right: 10, bottom: 20, left: 100});
+    const margin = ({top: 10, right: 10, bottom: 40, left: 120});
 
     // 3. Create a SVG we will use to make our chart.
     // See https://developer.mozilla.org/en-US/docs/Web/SVG for more on SVGs.
@@ -68,7 +68,17 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").
                     //     .attr('font-weight', 'bold')
                     //     .attr('x', width - margin.right)
                     //     .attr('y', -10)
-                    //     .text('Water');
+                    //     .text('Water Use (liter per 1000 kilocalories)');
+
+    svg.append('text')
+        .attr('x', (width + margin.left) / 2)
+        .attr('y', height - 5)
+        .attr('text-anchor', 'middle')
+        .attr('font-family', 'Helvetica Neue, Arial')
+        .attr('font-weight', 400)
+        .attr('font-size', 12)
+        .attr("fill", 'black')
+        .text('Water Use (liter per 1000 kilocalories)');
 
     //7. Drawing our y-axis
     const yAxis = svg.append('g')
@@ -82,7 +92,18 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").
         //     .attr('fill', 'black')
         //     .attr('font-size', '12px')
         //     .attr('font-weight', 'bold')
-        //     .text('Entity');
+        //     .text('Food');
+
+    svg.append('text')
+        .attr('transform', "rotate(-90)")
+        .attr('x', - (height - margin.bottom) / 2)
+        .attr('y', 10)
+        .attr('text-anchor', 'middle')
+        .attr('font-family', 'Helvetica Neue, Arial')
+        .attr('font-weight', 400)
+        .attr('font-size', 12)
+        .attr("fill", 'black')
+        .text('Food');
         
     //8.  Adding a background label for the number.
     const numberLabel = svg.append('text')
@@ -103,7 +124,6 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").
 
         yScale.domain(data.map(d => d.Entity));
         yAxis.transition().duration(1000).call(d3.axisLeft(yScale));
-        
         //xAxisHandleForUpdate.call(xAxis);
 
         const bars = svg

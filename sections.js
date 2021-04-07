@@ -247,7 +247,7 @@ function draw_bar() {
 
         //6. Drawing our x-axis
         const xAxis = svg.append('g')
-            .attr('transform', `translate(0, ${height - margin.bottom})`)
+            .attr('transform', `translate(15, ${height - margin.bottom})`)
             .call(d3.axisBottom(xScale))
         // Add x-axis title 'text' element.
         // .append('text')
@@ -259,9 +259,19 @@ function draw_bar() {
         //     .attr('y', -10)
         //     .text('Water');
 
+        svg.append('text')
+        .attr('x', (width + margin.left) / 2)
+        .attr('y', height - 5)
+        .attr('text-anchor', 'middle')
+        .attr('font-family', 'Helvetica Neue, Arial')
+        .attr('font-weight', 400)
+        .attr('font-size', 12)
+        .attr("fill", 'black')
+        .text('Water Use (liter per 1000 kilocalories)');
+
         //7. Drawing our y-axis
         const yAxis = svg.append('g')
-            .attr('transform', `translate(${margin.left}, 0)`)
+            .attr('transform', `translate(${margin.left + 15}, 0)`)
             .call(d3.axisLeft(yScale))
         // Add y-axis title 'text' element.
         // .append('text')
@@ -272,6 +282,17 @@ function draw_bar() {
         //     .attr('font-size', '12px')
         //     .attr('font-weight', 'bold')
         //     .text('Entity');
+
+        svg.append('text')
+        .attr('transform', "rotate(-90)")
+        .attr('x', - (height - margin.bottom) / 2)
+        .attr('y', 10)
+        .attr('text-anchor', 'middle')
+        .attr('font-family', 'Helvetica Neue, Arial')
+        .attr('font-weight', 400)
+        .attr('font-size', 12)
+        .attr("fill", 'black')
+        .text('Food');
 
         //8.  Adding a background label for the number.
         const numberLabel = svg.append('text')
@@ -303,7 +324,7 @@ function draw_bar() {
             bars.enter()
                 .append("rect")
                 .attr("class", "bar")
-                .attr('x', margin.left)
+                .attr('x', margin.left + 15)
                 .attr('y', d => yScale(d.Entity))
                 .attr('width', d => xScale(d.Water) - margin.left)
                 .attr('height', yScale.bandwidth())
@@ -330,7 +351,7 @@ function draw_bar() {
             // Update old ones, already have x / width from before
             bars
                 .transition().duration(250)
-                .attr('x', margin.left)
+                .attr('x', margin.left + 15)
                 .attr('y', d => yScale(d.Entity))
                 .attr('width', d => xScale(d.Water) - margin.left)
                 .attr('height', yScale.bandwidth())
