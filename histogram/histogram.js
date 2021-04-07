@@ -49,7 +49,7 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").
         return '#65d5db';
     }
 
-    var tooltip = d3.select("body").append("div")
+    var tooltip = d3.select("#chart").append("div")
         .attr("class", "tooltip")
         .style("opacity", 0);
     

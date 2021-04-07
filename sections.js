@@ -238,8 +238,9 @@ function draw_bar() {
             return '#65d5db';
         }
 
-        var tooltip = d3.select("body").append("div")
+        var tooltip = d3.select("#vis").append("div")
             .attr("class", "tooltip")
+            .style("position", "absolute")
             .style("opacity", 0);
 
         svg.append('g')
@@ -330,13 +331,15 @@ function draw_bar() {
                 .attr('height', yScale.bandwidth())
                 .attr('fill', d => coloring(d, selected))
                 .on("mouseover", function (event, d) {
+                    console.log(event.clientX);
+                    console.log(event.clientY);
                     tooltip.transition()
                         .duration(200)
                         .style("opacity", .9);
                     tooltip.html("Food: " + d.Entity + "<br/> Water: " + d.Water)
-                        .style("left", (event.pageX) + "px")
+                        .style("left", (event.clientX - 600) + "px")
                         .style("background", 'white')
-                        .style("top", (event.pageY - 28) + "px");
+                        .style("top", (event.clientY) + "px");
 
                     //.attr("d", symbol.size(64 * 4));
                 })
