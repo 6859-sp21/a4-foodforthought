@@ -4,6 +4,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <script src="https://code.jquery.com/jquery-1.7.2.min.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 
     <script src="https://d3js.org/d3.v3.min.js"></script>
     <script>
@@ -23,6 +24,45 @@
     <title>Food for Thought</title>
 
     <style>
+        #buttons {
+            margin:4px;
+            border-radius:4px;
+            overflow:auto;
+            float:left;
+        }
+
+        #buttons label {
+            float:left;
+            width:7.0em;
+            margin: 5px;
+        }
+
+        #buttons label span {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            text-align:center;
+            padding:3px 0px;
+            height: 50px;
+        }
+
+        #buttons label input {
+            height: 0px;
+            /*position:absolute;*/
+            /*top:-20px;*/
+        }
+
+        #buttons input:checked + span {
+            background-color:#911;
+            color:#fff;
+        }
+
+        #buttons input:checked + span:hover {
+            background-color: #9f5252;
+            color:#fff;
+        }
+
 
         .title {
             font-weight: bold;
@@ -38,6 +78,10 @@
         /*.grandparent text {*/
         /*    font-weight: bold;*/
         /*}*/
+
+        h1,h4, p, span{
+            font-family: Helvetica, Arial,sans-serif;
+        }
 
         rect {
             stroke: #fff;
@@ -105,9 +149,18 @@
             <svg id='legend' width='400px' height='500px'></svg>
         </section>
         <section class='step'>
-            <svg id='legend2' width='400px' height='450px'></svg>
+<!--            <svg id='legend2' width='400px' height='450px'></svg>-->
             <br><br>
-            But how can you understand the environmental impacts of your own diet? In addition to GHG emissions and water use, land use is another often overlooked factor that causes significant environmental degradation. Select your most commonly eaten proteins on the right to find out where the distribution of land use from your diet lies. 
+            <p>But <i class="fas fa-cow"></i> how can you understand the environmental impacts of your own diet? In addition to GHG emissions and water use, land use is another often overlooked factor that causes significant environmental degradation. Select your most commonly eaten proteins on the right to find out where the distribution of land use from your diet lies.</p>
+
+            <div id="buttons">
+
+            </div>
+
+            <div id="food-desc" style="height: 1000px">
+
+            </div>
+
 
         </section>
     </div>
