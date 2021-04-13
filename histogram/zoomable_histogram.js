@@ -32,7 +32,7 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").
         .attr('height', height);
 
 
-    // const defs = svg.append('defs')
+    const defs = svg.append('defs')
 
     // // use clipPath
     // defs.append('clipPath')
@@ -40,11 +40,9 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").
     //     .append('rect')
     //     .attr('width', width)
     //     .attr('height', height)
-        
-    const clip = d3.select("clip");
 
     svg.append("clipPath")
-        .attr("id", clip.id)
+        .attr("id", 'my-clip-path')
         .append("rect")
             .attr("x", margin.left)
             .attr("y", margin.top)
@@ -164,7 +162,7 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").
         // Add bars for new data
         bars.enter()
           .append("rect")
-            .attr("clip-path", clip)
+            .attr('clip-path','url(#my-clip-path)')
             .attr("class", "bar")
             .attr('x', margin.left)
             .attr('y', d => yScale(d.Entity))
@@ -209,29 +207,13 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").
     };
 
     const update = function() {
-        const n = data.length;
-        const index = parseInt(d3.select(this).property('value'), 10);
-        var start, end;
-        const selctedEntity = data[index].Entity;
-        WaterUsed = data[index].Water;
-        if (index < 4) {
-            start = 0;
-            end = 9;
-        } else if (index > n - 5) {
-            start = n - 9;
-            end = n;
-        } else {
-            start = index - 4;
-            end = index + 5;
-        }
-        const newData = data.slice(start, end);
-        updateBars(newData, selctedEntity);
+        updateBars(data, selctedEntity);
     };
 
     const zoom = d3.zoom()
     .scaleExtent([1, 32])
     .extent([[margin.left, 0], [width - margin.right, height]])
-    .translateExtent([[margin.left, -Infinity], [width - margin.right, Infinity]])
+    .translateExtent([[margin.left, 0], [width - margin.right, height]])
     .on("zoom", zoomed);
 
 
@@ -245,7 +227,7 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").
     d3.select("#EntitySelector")
         .on("change", update);
 
-    updateBars(initialData);
+    updateBars(data);
 
     svg.call(zoom);
 
