@@ -253,8 +253,7 @@ function draw_bar() {
             })
             .attr("value", function (d, i) {
                 return i;
-            })
-            .attr("font-family", "Arial");
+            });
 
         // 2. Setting up variables that describe our chart's space.
 
@@ -331,7 +330,7 @@ function draw_bar() {
 
         svg.append('text')
         .attr('transform', "rotate(-90)")
-        .attr('x', - (height - margin.bottom) / 2)
+        .attr('x', - ((height - margin.bottom) / 2) -50)
         .attr('y', 15)
         .attr('text-anchor', 'middle')
         .attr('font-family', 'Helvetica Neue, Arial')
