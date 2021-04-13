@@ -1,31 +1,3 @@
-let dataset, svg
-let salarySizeScale, salaryXScale, categoryColorScale
-let simulation, nodes
-let categoryLegend, salaryLegend
-
-const categories = ['Engineering', 'Business', 'Physical Sciences', 'Law & Public Policy', 'Computers & Mathematics', 'Agriculture & Natural Resources',
-    'Industrial Arts & Consumer Services', 'Arts', 'Health', 'Social Science', 'Biology & Life Science', 'Education', 'Humanities & Liberal Arts',
-    'Psychology & Social Work', 'Communications & Journalism', 'Interdisciplinary']
-
-const categoriesXY = {
-    'Engineering': [0, 400, 57382, 23.9],
-    'Business': [0, 600, 43538, 48.3],
-    'Physical Sciences': [0, 800, 41890, 50.9],
-    'Law & Public Policy': [0, 200, 42200, 48.3],
-    'Computers & Mathematics': [200, 400, 42745, 31.2],
-    'Agriculture & Natural Resources': [200, 600, 36900, 40.5],
-    'Industrial Arts & Consumer Services': [200, 800, 36342, 35.0],
-    'Arts': [200, 200, 33062, 60.4],
-    'Health': [400, 400, 36825, 79.5],
-    'Social Science': [400, 600, 37344, 55.4],
-    'Biology & Life Science': [400, 800, 36421, 58.7],
-    'Education': [400, 200, 32350, 74.9],
-    'Humanities & Liberal Arts': [600, 400, 31913, 63.2],
-    'Psychology & Social Work': [600, 600, 30100, 79.4],
-    'Communications & Journalism': [600, 800, 34500, 65.9],
-    'Interdisciplinary': [600, 200, 35000, 77.1]
-}
-
 const margin = {left: 100, top: 50, bottom: 50, right: 20}
 const width = 1200 - margin.left - margin.right
 const height = 850 - margin.top - margin.bottom
@@ -38,37 +10,81 @@ d3.select("#vis")
 
 draw_tree();
 
+const asc = arr => arr.sort((a, b) => a - b);
+
+const sum = arr => arr.reduce((a, b) => a + b, 0);
+
+const mean = arr => sum(arr) / arr.length;
+
+const quantile = (arr, q) => {
+    const sorted = asc(arr);
+    const pos = (sorted.length - 1) * q;
+    const base = Math.floor(pos);
+    const rest = pos - base;
+    if (sorted[base + 1] !== undefined) {
+        return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
+    } else {
+        return sorted[base];
+    }
+}
+
+var BrowserText = (function () {
+    var canvas = document.createElement('canvas'),
+        context = canvas.getContext('2d');
+
+    /**
+     * Measures the rendered width of arbitrary text given the font size and font face
+     * @param {string} text The text to measure
+     * @param {number} fontSize The font size in pixels
+     * @param {string} fontFace The font face ("Arial", "Helvetica", etc.)
+     * @returns {number} The width of the text
+     **/
+    function getWidth(text, fontSize, fontFace) {
+        context.font = fontSize + 'px ' + fontFace;
+        return context.measureText(text).width;
+    }
+
+    return {
+        getWidth: getWidth
+    };
+})();
+
+
 function draw_hist() {
     clean();
-    let svg = d3.select('#vis').select('svg')
+    const svg = d3.select('#vis').select('svg')
+        .attr('width', width)
+        .attr('height', height + 1000);
 
-    d3.json("https://gist.githubusercontent.com/sauhaardac/11a605b1291add372ab77cff7044353f/raw/281e2d8a8ea91ce1afa7224717db07b3d94a2d1f/commodities.json").then((data) => {
-            const x_min = -5, x_max = 15;
-            var x = d3.scaleLinear()
-                .domain([x_min, x_max])
-                .range([margin.left, width + margin.left]);
-            var kde = kernelDensityEstimator(kernelEpanechnikov(1), x.ticks(100))
+    d3.json("https://gist.githubusercontent.com/sauhaardac/11a605b1291add372ab77cff7044353f/raw/0cf59f720191b65a7727f46e789c266d47de919a/commodities.json").then((data) => {
+            console.log(data)
 
-            var colorScale = d3.scaleOrdinal(d3.schemeTableau10).domain(Object.keys(data))
 
-            d3.select('#vis').selectAll('input')
+            var lbl = d3.select('#buttons').selectAll('label')
                 .data(Object.keys(data))
                 .enter()
-                .append('a')
-                .attr('class', 'graph-button')
-                .text((d) => d)
-                .append('input')
+                .append('label')
+
+            lbl.append('input')
                 .attr('type', 'checkbox')
                 .attr('class', 'graph-button')
                 .attr('id', (d) => d.replace(/\s/g, ''))
                 .on('change', update)
                 .property('checked', true);
 
+            lbl.append('span').text((d) => d)
+
+
+            var colorScale = d3.scaleOrdinal(d3.schemeTableau10).domain(Object.keys(data))
+
             update();
 
 
             function update() {
-                svg.html("");
+                margin.top = margin.top + 100
+
+                d3.select('#food-desc').html("")
+
                 const newData = Object.keys(data)
                     .filter(key => d3.select("#" + key.replace(/\s/g, '')).property("checked"))
                     .reduce((obj, key) => {
@@ -76,11 +92,36 @@ function draw_hist() {
                         return obj;
                     }, {});
 
+                var x_max = -1000;
+
+                for (var comm of Object.keys(newData)) {
+                    x_max = Math.max(x_max, quantile(newData[comm], 0.8))
+                }
+
+                var x_min = -0.05 * x_max
+                // var x_min = -5, x_max = 20;
+
+                console.log('min and max')
+                console.log(x_max)
+                console.log(x_min)
+
+                var x = d3.scaleLinear()
+                    .domain([x_min, x_max])
+                    .range([margin.left, width + margin.left]);
+
+                var kde = kernelDensityEstimator(kernelEpanechnikov(1), x.ticks(100))
+
+
+                svg.html("");
+
                 const used_commodities = Object.keys(newData);
                 const num_commodities = Object.keys(newData).length;
                 var comm_num = 0;
 
                 for (var comm of Object.keys(newData)) {
+                    d3.select('#food-desc').append('h4')
+                        .text(comm)
+
                     console.log(`Commodity (#${comm_num}) = ${comm}`);
                     indicator = newData[comm];
 
@@ -93,19 +134,19 @@ function draw_hist() {
                         .range([margin.top + (comm_num + 1) * height / (num_commodities + 1), margin.top + (comm_num) * height / (num_commodities + 1)])
                         .domain([0, graph_ymax]);
 
-                    if (comm_num === num_commodities - 1){
+                    if (comm_num === num_commodities - 1) {
                         svg.append("g")
                             .attr("transform", "translate(0," + y(0) + ")")
                             .call(d3.axisBottom(x));
 
                         svg.append('text')
-                            .attr('x', x(1.5))
-                            .attr('y', y(-0.35 * graph_ymax))
+                            .attr('x', width / 2 + margin.left - BrowserText.getWidth('Land Use (m²/kg of product)', 20, 'Helvetica Neue, Arial'))
+                            .attr('y', height)
                             .attr('font-family', 'Helvetica Neue, Arial')
                             .attr('font-weight', 700)
                             .attr('font-size', 20)
                             .attr("fill", 'black')
-                            .text('Land Use (m²/100 g of protein)');
+                            .text('Land Use (m²/kg of product)');
 
                     }
 
@@ -114,7 +155,7 @@ function draw_hist() {
                         .call(d3.axisLeft(y).tickSize(0).tickValues([]));
 
                     svg.append('text')
-                        .attr('x', x(x_min))
+                        .attr('x', 0)
                         .attr('y', y(graph_ymax * 0.07))
                         .attr('font-family', 'Helvetica Neue, Arial')
                         .attr('font-weight', 700)
@@ -147,7 +188,7 @@ function draw_hist() {
 
                     comm_num += 1;
                 }
-
+                margin.top = margin.top - 100
             }
         }
     );
@@ -159,7 +200,7 @@ function draw_hist() {
 function clean() {
     let svg = d3.select('#vis').select('svg')
     svg.html("");
-    d3.selectAll('.graph-button').remove()
+    // d3.selectAll('.graph-button').remove()
     d3.selectAll('#EntitySelector').remove()
     d3.selectAll('.tooltip').remove()
 }
@@ -191,6 +232,7 @@ function draw_bar() {
 
     d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").then((data) => {
         // 1. Sort data.
+        WaterUsed = 3413
         data.forEach(d => d.Water = parseInt(d.Water, 10));
         data.sort((a, b) => b.Water - a.Water);
         console.log(data);
@@ -199,7 +241,7 @@ function draw_bar() {
         console.log(initialData);
         var WaterUsed;
 
-        // create the drop down menu of cities
+        // create the drop down menu of foods
         var selector = d3.select("#vis")
             .append("select")
             .attr("id", "EntitySelector")
@@ -266,10 +308,11 @@ function draw_bar() {
         .attr('y', height - 5)
         .attr('text-anchor', 'middle')
         .attr('font-family', 'Helvetica Neue, Arial')
-        .attr('font-weight', 400)
-        .attr('font-size', 12)
+        .attr('font-weight', 700)
+        .attr('font-size', 20)
         .attr("fill", 'black')
-        .text('Water Use (liter per 1000 kilocalories)');
+        .text('Water Use (L/1000 kcal)');
+
 
         //7. Drawing our y-axis
         const yAxis = svg.append('g')
@@ -287,26 +330,35 @@ function draw_bar() {
 
         svg.append('text')
         .attr('transform', "rotate(-90)")
-        .attr('x', - (height - margin.bottom) / 2)
-        .attr('y', 10)
+        .attr('x', - ((height - margin.bottom) / 2) -50)
+        .attr('y', 15)
         .attr('text-anchor', 'middle')
         .attr('font-family', 'Helvetica Neue, Arial')
-        .attr('font-weight', 400)
-        .attr('font-size', 12)
+        .attr('font-weight', 700)
+        .attr('font-size', 20)
         .attr("fill", 'black')
-        .text('Food');
+        .text('Food Commodity');
+
 
         //8.  Adding a background label for the number.
         const numberLabel = svg.append('text')
             .attr("text-anchor", "end")
             .attr('x', width - margin.right)
             .attr('y', margin.top + 60)
-            .attr('fill', '#ccc')
+            .attr('fill', '#000000')
             .attr('font-family', 'Helvetica Neue, Arial')
-            .attr('font-weight', 500)
-            .attr('font-size', 80)
+            .attr('font-weight', 700)
+            .attr('font-size', 35)
             .text(WaterUsed);
-
+        const numberContext = svg.append('text')
+        .attr("text-anchor", "end")
+        .attr('x', width - margin.right)
+        .attr('y', margin.top + 110)
+        .attr('fill', '#000000')
+        .attr('font-family', 'Helvetica Neue, Arial')
+        .attr('font-weight', 700)
+        .attr('font-size', 35)
+        .text(WaterUsed);
         const updateBars = function (data, selected) {
             // First update the y-axis domain to match data
             console.log(data);
@@ -365,10 +417,17 @@ function draw_bar() {
             bars.exit().remove();
 
             numberLabel
-                .text(WaterUsed)
+                .text(WaterUsed + ' L/1000 kcal =')
+                .transition()
+                .duration(1000)
+            numberContext
+                .text(Number((WaterUsed/300).toFixed(2)) + ' bathtubs/meal')
                 .transition()
                 .duration(1000)
         };
+
+
+
 
         const update = function () {
             const n = data.length;
@@ -500,7 +559,7 @@ function main(o, data) {
         height = opts.height - margin.top - margin.bottom - theight,
         transitioning;
 
-    var color = d3.scaleOrdinal(d3.schemeTableau10);
+    var color = d3v3.scale.category20c();
 
     var x = d3v3.scale.linear()
         .domain([0, width])
@@ -526,7 +585,7 @@ function main(o, data) {
         // .style("margin-left", -margin.left + "px")
         // .style("margin.right", -margin.right + "px")
         .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+        .attr("transform", "translate(" + margin.left + "," + (margin.top + 50) + ")")
         .style("shape-rendering", "crispEdges");
 
     var grandparent = svg.append("g")
@@ -540,7 +599,8 @@ function main(o, data) {
     grandparent.append("text")
         .attr("x", 6)
         .attr("y", 6 - margin.top)
-        .attr("dy", ".75em");
+        .attr("dy", ".75em")
+        .attr("font-family", "Arial");
 
     if (opts.title) {
         $("#chart").prepend("<p class='title'>" + opts.title + "</p>");
@@ -600,7 +660,10 @@ function main(o, data) {
             .datum(d.parent)
             .on("click", transition)
             .select("text")
-            .text(name(d));
+            .text(name(d) + " ⬅ (click to zoom out)")
+            .attr("font-family", "Arial")
+            .attr("font-weight", "bold")
+            .attr("font-size", 18);
 
         var g1 = svg.insert("g", ".grandparent")
             .datum(d)
@@ -628,12 +691,14 @@ function main(o, data) {
             .append("title")
             .text(function (d) {
                 return d.key + " (" + formatNumber(d.value) + "\%)";
-            });
+            })
+            .attr("font-family", "Arial");
         children.append("text")
             .attr("class", "ctext")
             .text(function (d) {
                 return d.key + " (" + formatNumber(d.value) + "\%)";
             })
+           .attr("font-family", "Arial")
             .call(text2);
 
         g.append("rect")
@@ -643,16 +708,19 @@ function main(o, data) {
         var t = g.append("text")
             .attr("class", "ptext")
             .attr("dy", ".75em")
+            .attr("font-family", "Arial")
 
         t.append("tspan")
             .text(function (d) {
                 return d.key;
-            });
+            })
+            .attr("font-family", "Arial");
         t.append("tspan")
             .attr("dy", "1.0em")
             .text(function (d) {
                 return formatNumber(d.value) + "\%";
-            });
+            })
+           .attr("font-family", "Arial");
         t.call(text);
 
         g.selectAll("rect")
@@ -746,7 +814,7 @@ function main(o, data) {
 
     function name(d) {
         return d.parent
-            ? name(d.parent) + " / " + d.key + " (" + formatNumber(d.value) + "\%)"
+         ? name(d.parent) + " / " + d.key + " (" + formatNumber(d.value) + "\%)"
             : d.key + " (" + formatNumber(d.value) + "\%)";
     }
 }
