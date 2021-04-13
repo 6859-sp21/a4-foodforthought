@@ -26,7 +26,7 @@ const categoriesXY = {
     'Interdisciplinary': [600, 200, 35000, 77.1]
 }
 
-const margin = {left: 100, top: 50, bottom: 50, right: 20}
+const margin = {left: 200, top: 50, bottom: 50, right: 20}
 const width = 1200 - margin.left - margin.right
 const height = 850 - margin.top - margin.bottom
 
@@ -38,37 +38,81 @@ d3.select("#vis")
 
 draw_tree();
 
+const asc = arr => arr.sort((a, b) => a - b);
+
+const sum = arr => arr.reduce((a, b) => a + b, 0);
+
+const mean = arr => sum(arr) / arr.length;
+
+const quantile = (arr, q) => {
+    const sorted = asc(arr);
+    const pos = (sorted.length - 1) * q;
+    const base = Math.floor(pos);
+    const rest = pos - base;
+    if (sorted[base + 1] !== undefined) {
+        return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
+    } else {
+        return sorted[base];
+    }
+}
+
+var BrowserText = (function () {
+    var canvas = document.createElement('canvas'),
+        context = canvas.getContext('2d');
+
+    /**
+     * Measures the rendered width of arbitrary text given the font size and font face
+     * @param {string} text The text to measure
+     * @param {number} fontSize The font size in pixels
+     * @param {string} fontFace The font face ("Arial", "Helvetica", etc.)
+     * @returns {number} The width of the text
+     **/
+    function getWidth(text, fontSize, fontFace) {
+        context.font = fontSize + 'px ' + fontFace;
+        return context.measureText(text).width;
+    }
+
+    return {
+        getWidth: getWidth
+    };
+})();
+
+
 function draw_hist() {
     clean();
-    let svg = d3.select('#vis').select('svg')
+    const svg = d3.select('#vis').select('svg')
+        .attr('width', width)
+        .attr('height', height + 1000);
 
-    d3.json("https://gist.githubusercontent.com/sauhaardac/11a605b1291add372ab77cff7044353f/raw/281e2d8a8ea91ce1afa7224717db07b3d94a2d1f/commodities.json").then((data) => {
-            const x_min = -5, x_max = 15;
-            var x = d3.scaleLinear()
-                .domain([x_min, x_max])
-                .range([margin.left, width + margin.left]);
-            var kde = kernelDensityEstimator(kernelEpanechnikov(1), x.ticks(100))
+    d3.json("https://gist.githubusercontent.com/sauhaardac/11a605b1291add372ab77cff7044353f/raw/0cf59f720191b65a7727f46e789c266d47de919a/commodities.json").then((data) => {
+            console.log(data)
 
-            var colorScale = d3.scaleOrdinal(d3.schemeTableau10).domain(Object.keys(data))
 
-            d3.select('#vis').selectAll('input')
+            var lbl = d3.select('#buttons').selectAll('label')
                 .data(Object.keys(data))
                 .enter()
-                .append('a')
-                .attr('class', 'graph-button')
-                .text((d) => d)
-                .append('input')
+                .append('label')
+
+            lbl.append('input')
                 .attr('type', 'checkbox')
                 .attr('class', 'graph-button')
                 .attr('id', (d) => d.replace(/\s/g, ''))
                 .on('change', update)
                 .property('checked', true);
 
+            lbl.append('span').text((d) => d)
+
+
+            var colorScale = d3.scaleOrdinal(d3.schemeTableau10).domain(Object.keys(data))
+
             update();
 
 
             function update() {
-                svg.html("");
+                margin.top = margin.top + 100
+
+                d3.select('#food-desc').html("")
+
                 const newData = Object.keys(data)
                     .filter(key => d3.select("#" + key.replace(/\s/g, '')).property("checked"))
                     .reduce((obj, key) => {
@@ -76,11 +120,36 @@ function draw_hist() {
                         return obj;
                     }, {});
 
+                var x_max = -1000;
+
+                for (var comm of Object.keys(newData)) {
+                    x_max = Math.max(x_max, quantile(newData[comm], 0.8))
+                }
+
+                var x_min = -0.05 * x_max
+                // var x_min = -5, x_max = 20;
+
+                console.log('min and max')
+                console.log(x_max)
+                console.log(x_min)
+
+                var x = d3.scaleLinear()
+                    .domain([x_min, x_max])
+                    .range([margin.left, width + margin.left]);
+
+                var kde = kernelDensityEstimator(kernelEpanechnikov(1), x.ticks(100))
+
+
+                svg.html("");
+
                 const used_commodities = Object.keys(newData);
                 const num_commodities = Object.keys(newData).length;
                 var comm_num = 0;
 
                 for (var comm of Object.keys(newData)) {
+                    d3.select('#food-desc').append('h4')
+                        .text(comm)
+
                     console.log(`Commodity (#${comm_num}) = ${comm}`);
                     indicator = newData[comm];
 
@@ -93,19 +162,19 @@ function draw_hist() {
                         .range([margin.top + (comm_num + 1) * height / (num_commodities + 1), margin.top + (comm_num) * height / (num_commodities + 1)])
                         .domain([0, graph_ymax]);
 
-                    if (comm_num === num_commodities - 1){
+                    if (comm_num === num_commodities - 1) {
                         svg.append("g")
                             .attr("transform", "translate(0," + y(0) + ")")
                             .call(d3.axisBottom(x));
 
                         svg.append('text')
-                            .attr('x', x(1.5))
-                            .attr('y', y(-0.35 * graph_ymax))
+                            .attr('x', width / 2 + margin.left - BrowserText.getWidth('Land Use (m²/kg of product)', 20, 'Helvetica Neue, Arial'))
+                            .attr('y', height)
                             .attr('font-family', 'Helvetica Neue, Arial')
                             .attr('font-weight', 700)
                             .attr('font-size', 20)
                             .attr("fill", 'black')
-                            .text('Land Use (m²/100 g of protein)');
+                            .text('Land Use (m²/kg of product)');
 
                     }
 
@@ -114,7 +183,7 @@ function draw_hist() {
                         .call(d3.axisLeft(y).tickSize(0).tickValues([]));
 
                     svg.append('text')
-                        .attr('x', x(x_min))
+                        .attr('x', 0)
                         .attr('y', y(graph_ymax * 0.07))
                         .attr('font-family', 'Helvetica Neue, Arial')
                         .attr('font-weight', 700)
@@ -147,7 +216,7 @@ function draw_hist() {
 
                     comm_num += 1;
                 }
-
+                margin.top = margin.top - 100
             }
         }
     );
@@ -159,7 +228,7 @@ function draw_hist() {
 function clean() {
     let svg = d3.select('#vis').select('svg')
     svg.html("");
-    d3.selectAll('.graph-button').remove()
+    // d3.selectAll('.graph-button').remove()
     d3.selectAll('#EntitySelector').remove()
     d3.selectAll('.tooltip').remove()
 }
@@ -262,14 +331,14 @@ function draw_bar() {
         //     .text('Water');
 
         svg.append('text')
-        .attr('x', (width + margin.left) / 2)
-        .attr('y', height - 5)
-        .attr('text-anchor', 'middle')
-        .attr('font-family', 'Helvetica Neue, Arial')
-        .attr('font-weight', 400)
-        .attr('font-size', 12)
-        .attr("fill", 'black')
-        .text('Water Use (liter per 1000 kilocalories)');
+            .attr('x', (width + margin.left) / 2)
+            .attr('y', height - 5)
+            .attr('text-anchor', 'middle')
+            .attr('font-family', 'Helvetica Neue, Arial')
+            .attr('font-weight', 400)
+            .attr('font-size', 12)
+            .attr("fill", 'black')
+            .text('Water Use (liter per 1000 kilocalories)');
 
         //7. Drawing our y-axis
         const yAxis = svg.append('g')
@@ -286,15 +355,15 @@ function draw_bar() {
         //     .text('Entity');
 
         svg.append('text')
-        .attr('transform', "rotate(-90)")
-        .attr('x', - (height - margin.bottom) / 2)
-        .attr('y', 10)
-        .attr('text-anchor', 'middle')
-        .attr('font-family', 'Helvetica Neue, Arial')
-        .attr('font-weight', 400)
-        .attr('font-size', 12)
-        .attr("fill", 'black')
-        .text('Food');
+            .attr('transform', "rotate(-90)")
+            .attr('x', -(height - margin.bottom) / 2)
+            .attr('y', 10)
+            .attr('text-anchor', 'middle')
+            .attr('font-family', 'Helvetica Neue, Arial')
+            .attr('font-weight', 400)
+            .attr('font-size', 12)
+            .attr("fill", 'black')
+            .text('Food');
 
         //8.  Adding a background label for the number.
         const numberLabel = svg.append('text')
