@@ -191,6 +191,7 @@ function draw_bar() {
 
     d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").then((data) => {
         // 1. Sort data.
+        WaterUsed = 3413
         data.forEach(d => d.Water = parseInt(d.Water, 10));
         data.sort((a, b) => b.Water - a.Water);
         console.log(data);
@@ -199,7 +200,7 @@ function draw_bar() {
         console.log(initialData);
         var WaterUsed;
 
-        // create the drop down menu of cities
+        // create the drop down menu of foods
         var selector = d3.select("#vis")
             .append("select")
             .attr("id", "EntitySelector")
@@ -211,7 +212,8 @@ function draw_bar() {
             })
             .attr("value", function (d, i) {
                 return i;
-            });
+            })
+            .attr("font-family", "Arial");
 
         // 2. Setting up variables that describe our chart's space.
 
@@ -266,10 +268,10 @@ function draw_bar() {
         .attr('y', height - 5)
         .attr('text-anchor', 'middle')
         .attr('font-family', 'Helvetica Neue, Arial')
-        .attr('font-weight', 400)
-        .attr('font-size', 12)
+        .attr('font-weight', 700)
+        .attr('font-size', 20)
         .attr("fill", 'black')
-        .text('Water Use (liter per 1000 kilocalories)');
+        .text('Water Use (L/1000 kcal)');
 
         //7. Drawing our y-axis
         const yAxis = svg.append('g')
@@ -288,25 +290,33 @@ function draw_bar() {
         svg.append('text')
         .attr('transform', "rotate(-90)")
         .attr('x', - (height - margin.bottom) / 2)
-        .attr('y', 10)
+        .attr('y', 15)
         .attr('text-anchor', 'middle')
         .attr('font-family', 'Helvetica Neue, Arial')
-        .attr('font-weight', 400)
-        .attr('font-size', 12)
+        .attr('font-weight', 700)
+        .attr('font-size', 20)
         .attr("fill", 'black')
-        .text('Food');
+        .text('Food Commodity');
 
         //8.  Adding a background label for the number.
         const numberLabel = svg.append('text')
             .attr("text-anchor", "end")
             .attr('x', width - margin.right)
             .attr('y', margin.top + 60)
-            .attr('fill', '#ccc')
+            .attr('fill', '#000000')
             .attr('font-family', 'Helvetica Neue, Arial')
-            .attr('font-weight', 500)
-            .attr('font-size', 80)
+            .attr('font-weight', 700)
+            .attr('font-size', 45)
             .text(WaterUsed);
-
+        const numberContext = svg.append('text')
+        .attr("text-anchor", "end")
+        .attr('x', width - margin.right)
+        .attr('y', margin.top + 110)
+        .attr('fill', '#000000')
+        .attr('font-family', 'Helvetica Neue, Arial')
+        .attr('font-weight', 700)
+        .attr('font-size', 45)
+        .text(WaterUsed);
         const updateBars = function (data, selected) {
             // First update the y-axis domain to match data
             console.log(data);
@@ -365,10 +375,17 @@ function draw_bar() {
             bars.exit().remove();
 
             numberLabel
-                .text(WaterUsed)
+                .text(WaterUsed + ' L/1000 kcal =')
+                .transition()
+                .duration(1000)
+            numberContext
+                .text(Number((WaterUsed/300).toFixed(2)) + ' bathtubs/meal')
                 .transition()
                 .duration(1000)
         };
+
+
+
 
         const update = function () {
             const n = data.length;
@@ -500,7 +517,7 @@ function main(o, data) {
         height = opts.height - margin.top - margin.bottom - theight,
         transitioning;
 
-    var color = d3.scaleOrdinal(d3.schemeTableau10);
+    var color = d3v3.scale.category20c();
 
     var x = d3v3.scale.linear()
         .domain([0, width])
@@ -526,7 +543,7 @@ function main(o, data) {
         // .style("margin-left", -margin.left + "px")
         // .style("margin.right", -margin.right + "px")
         .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+        .attr("transform", "translate(" + margin.left + "," + (margin.top + 50) + ")")
         .style("shape-rendering", "crispEdges");
 
     var grandparent = svg.append("g")
@@ -540,7 +557,8 @@ function main(o, data) {
     grandparent.append("text")
         .attr("x", 6)
         .attr("y", 6 - margin.top)
-        .attr("dy", ".75em");
+        .attr("dy", ".75em")
+        .attr("font-family", "Arial");
 
     if (opts.title) {
         $("#chart").prepend("<p class='title'>" + opts.title + "</p>");
@@ -600,7 +618,10 @@ function main(o, data) {
             .datum(d.parent)
             .on("click", transition)
             .select("text")
-            .text(name(d));
+            .text(name(d) + " ⬅ (click to zoom out)")
+            .attr("font-family", "Arial")
+            .attr("font-weight", "bold")
+            .attr("font-size", 18);
 
         var g1 = svg.insert("g", ".grandparent")
             .datum(d)
@@ -628,12 +649,14 @@ function main(o, data) {
             .append("title")
             .text(function (d) {
                 return d.key + " (" + formatNumber(d.value) + "\%)";
-            });
+            })
+            .attr("font-family", "Arial");
         children.append("text")
             .attr("class", "ctext")
             .text(function (d) {
                 return d.key + " (" + formatNumber(d.value) + "\%)";
             })
+           .attr("font-family", "Arial")
             .call(text2);
 
         g.append("rect")
@@ -643,16 +666,19 @@ function main(o, data) {
         var t = g.append("text")
             .attr("class", "ptext")
             .attr("dy", ".75em")
+            .attr("font-family", "Arial")
 
         t.append("tspan")
             .text(function (d) {
                 return d.key;
-            });
+            })
+            .attr("font-family", "Arial");
         t.append("tspan")
             .attr("dy", "1.0em")
             .text(function (d) {
                 return formatNumber(d.value) + "\%";
-            });
+            })
+           .attr("font-family", "Arial");
         t.call(text);
 
         g.selectAll("rect")
@@ -746,7 +772,7 @@ function main(o, data) {
 
     function name(d) {
         return d.parent
-            ? name(d.parent) + " / " + d.key + " (" + formatNumber(d.value) + "\%)"
+         ? name(d.parent) + " / " + d.key + " (" + formatNumber(d.value) + "\%)"
             : d.key + " (" + formatNumber(d.value) + "\%)";
     }
 }
