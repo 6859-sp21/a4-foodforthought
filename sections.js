@@ -285,27 +285,12 @@ function draw_bar() {
         // sort button
 
         // 1. Sort data.
-        WaterUsed = 3413
+        waterUsed = 3413
         data.forEach(d => d.Water = parseInt(d.Water, 10));
-        data.sort((a, b) => b.Water - a.Water);
+        data.sort((a, b) => a.Water - b.Water);
         data.forEach((d, i) => d.Rank = i + 1);
-        var WaterUsed;
-
-        // create the drop down menu of foods
-        // var selector = d3.select("#vis")
-        //     .append("select")
-        //     .attr("id", "EntitySelector")
-        //     .selectAll("option")
-        //     .data(data)
-        //     .enter().append("option")
-        //     .text(function (d) {
-        //         return d.Entity;
-        //     })
-        //     .attr("value", function (d, i) {
-        //         return i;
-        //     });
-
-        // 2. Setting up variables that describe our chart's space.
+        var waterUsed;
+        var selected = [];
 
         // 3. Create a SVG we will use to make our chart.
         // See https://developer.mozilla.org/en-US/docs/Web/SVG for more on SVGs.
@@ -325,7 +310,7 @@ function draw_bar() {
             .padding(0.1);
 
         const coloring = function (d, selected) {
-            if (d.Entity == selected) {
+            if (selected.includes(d.Entity)) {
                 return '#FF930E';
             }
             return '#1F77B4';
@@ -399,7 +384,7 @@ function draw_bar() {
             .attr('font-family', 'Helvetica Neue, Arial')
             .attr('font-weight', 700)
             .attr('font-size', 35)
-            .text(WaterUsed);
+            .text(waterUsed);
         const numberContext = svg.append('text')
         .attr("text-anchor", "end")
         .attr('x', width - margin.right)
@@ -408,10 +393,7 @@ function draw_bar() {
         .attr('font-family', 'Helvetica Neue, Arial')
         .attr('font-weight', 700)
         .attr('font-size', 35)
-        .text(WaterUsed);
-        
-        
-        
+        .text(waterUsed);
         
         const updateBars = function (data, selected) {
             // First update the y-axis domain to match data
@@ -468,11 +450,11 @@ function draw_bar() {
             bars.exit().remove();
 
             numberLabel
-                .text(WaterUsed + ' L/1000 kcal =')
+                .text(waterUsed + ' L/1000 kcal =')
                 .transition()
                 .duration(1000)
             numberContext
-                .text(Number((WaterUsed / 300).toFixed(2)) + ' bathtubs/meal')
+                .text(Number((waterUsed / 300).toFixed(2)) + ' bathtubs/meal')
                 .transition()
                 .duration(1000)
         };
@@ -490,8 +472,26 @@ function draw_bar() {
                 data.sort((a, b) => a.Water - b.Water);
             }
 
-            updateBars(data);
+            updateBars(data, selected);
         };
+
+        const search = function() {
+            const filter = d3.select(this).property('value').toUpperCase();
+            selected = []
+            data.forEach(d => {
+                if (d.Entity.toUpperCase().indexOf(filter) > -1) {
+                    selected.push(d.Entity)
+                }
+            });
+            if (filter.length == 0) {
+                selected = []
+            }
+            console.log(selected);
+            updateBars(data, selected);
+        }
+
+        d3.selectAll(("input[id='search']"))
+            .on("keyup", search);
 
         d3.selectAll(("input[name='options']"))
             .on("change", reorder);
@@ -499,7 +499,7 @@ function draw_bar() {
         // d3.select("#EntitySelector")
         //     .on("change", update);
 
-        updateBars(data);
+        updateBars(data, selected);
 
         document.getElementById("vis").appendChild(svg.node());
     });
