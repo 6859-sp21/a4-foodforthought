@@ -5,7 +5,6 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://code.jquery.com/jquery-1.7.2.min.js"></script>
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-
     <script src="https://d3js.org/d3.v3.min.js"></script>
     <script>
         d3v3 = d3
@@ -184,8 +183,15 @@
             </p>
             <a href = "https://www.worldbank.org/en/topic/water-in-agriculture" target="_blank" rel="noopener noreferrer">
             <img src="water_icon.png" alt="Icon of water droplet" class='icon'></img>        
-            <svg id='legend' width='400px' height='500px'></svg>
             </a>
+            <div id='toggle_order'>
+                <label>
+                  <input type="radio" name="options" value="name"> Sort Alphabetically
+                </label>
+                <label>
+                  <input type="radio" name="options" value="water"  checked> Sort by Water Use
+                </label>
+            </div>
         </section>
         <section class='step'>
 <!--            <svg id='legend2' width='400px' height='450px'></svg>-->
@@ -200,7 +206,6 @@
             <div id="buttons">
 
             </div>
-
             <div id="food-desc" style="height: 1500px">
 
             </div>

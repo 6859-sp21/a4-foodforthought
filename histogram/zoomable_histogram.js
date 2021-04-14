@@ -51,12 +51,12 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").
 
     // 4. Setting up scales.
     const xScale = d3.scaleLinear()
-        .domain(d3.extent(initialData, d => d.Water))
+        .domain(d3.extent(data, d => d.Water))
         .range([margin.left, width - margin.right])
         .nice();
     
     const yScale = d3.scaleBand()
-        .domain(initialData.map(d => d.Entity))
+        .domain(d3.extent(data, d => d.Entity))
         .range([height - margin.bottom, margin.top])
         .padding(0.1);
 
@@ -105,14 +105,14 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").
         .text('Water Use (liter per 1000 kilocalories)');
 
     //7. Drawing our y-axis
-    const y = function(g) {
+    const y = function(g, yScale) {
         g.attr('transform', `translate(${margin.left}, 0)`)
         .call(d3.axisLeft(yScale).tickSizeOuter(0))
     }
 
     const yAxis = svg.append('g')
         .attr("class", "y-axis")
-        .call(y)
+        .call(y, yScale)
         // Add y-axis title 'text' element.
         // .append('text')
         //     .attr('transform', `translate(20, ${margin.top}) rotate(-90)`)
@@ -218,9 +218,13 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").
 
 
     function zoomed(event) {
-        yScale.range([height - margin.bottom, margin.top].map(d => event.transform.applyX(d)));
+        console.log(event.transform.rescaleY)
+        //const newYScale = event.transform.rescaleY(yScale);
+        // const xz = event.transform.rescaleX(xScale);
+        // const yz = event.transform.rescaleY(yScale);
+        yScale.range([height - margin.bottom, margin.top].map(d => event.transform.applyY(d)));
         svg.selectAll(".bar").attr("y", d => yScale(d.Entity)).attr("height", yScale.bandwidth());
-        svg.selectAll(".y-axis").call(y);
+        yAxis.call(y, yScale);
     }
 
 

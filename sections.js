@@ -244,29 +244,28 @@ function draw_bar() {
     clean();
 
     d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").then((data) => {
+        // sort button
+
         // 1. Sort data.
         WaterUsed = 3413
         data.forEach(d => d.Water = parseInt(d.Water, 10));
         data.sort((a, b) => b.Water - a.Water);
-        console.log(data);
-        data.forEach((d, i) => d.Entity = `${i + 1}. ${d.Entity}`);
-        const initialData = data.slice(0, 9);
-        console.log(initialData);
+        data.forEach((d, i) => d.Rank = i + 1);
         var WaterUsed;
 
         // create the drop down menu of foods
-        var selector = d3.select("#vis")
-            .append("select")
-            .attr("id", "EntitySelector")
-            .selectAll("option")
-            .data(data)
-            .enter().append("option")
-            .text(function (d) {
-                return d.Entity;
-            })
-            .attr("value", function (d, i) {
-                return i;
-            });
+        // var selector = d3.select("#vis")
+        //     .append("select")
+        //     .attr("id", "EntitySelector")
+        //     .selectAll("option")
+        //     .data(data)
+        //     .enter().append("option")
+        //     .text(function (d) {
+        //         return d.Entity;
+        //     })
+        //     .attr("value", function (d, i) {
+        //         return i;
+        //     });
 
         // 2. Setting up variables that describe our chart's space.
 
@@ -278,12 +277,12 @@ function draw_bar() {
 
         // 4. Setting up scales.
         const xScale = d3.scaleLinear()
-            .domain([0, d3.max(initialData, d => d.Water)])
+            .domain([0, d3.max(data, d => d.Water)])
             .range([margin.left, width - margin.right])
             .nice();
 
         const yScale = d3.scaleBand()
-            .domain(initialData.map(d => d.Entity))
+            .domain(data.map(d => d.Entity))
             .range([height - margin.bottom, margin.top])
             .padding(0.1);
 
@@ -372,9 +371,12 @@ function draw_bar() {
         .attr('font-weight', 700)
         .attr('font-size', 35)
         .text(WaterUsed);
+        
+        
+        
+        
         const updateBars = function (data, selected) {
             // First update the y-axis domain to match data
-            console.log(data);
             xScale.domain([0, d3.max(data, d => d.Water)]);
             xAxis.transition().duration(1000).call(d3.axisBottom(xScale))
 
@@ -397,12 +399,10 @@ function draw_bar() {
                 .attr('height', yScale.bandwidth())
                 .attr('fill', d => coloring(d, selected))
                 .on("mouseover", function (event, d) {
-                    console.log(event.clientX);
-                    console.log(event.clientY);
                     tooltip.transition()
                         .duration(200)
                         .style("opacity", .9);
-                    tooltip.html("Food: " + d.Entity + "<br/> Water: " + d.Water)
+                    tooltip.html("Rank: " + d.Rank + "<br/> Food: " + d.Entity + "<br/> Water: " + d.Water)
                         .style("left", (event.clientX - 600) + "px")
                         .style("background", 'white')
                         .style("top", (event.clientY) + "px");
@@ -439,33 +439,29 @@ function draw_bar() {
                 .duration(1000)
         };
 
-
-
-
-        const update = function () {
-            const n = data.length;
-            const index = parseInt(d3.select(this).property('value'), 10);
-            var start, end;
-            const selctedEntity = data[index].Entity;
-            WaterUsed = data[index].Water;
-            if (index < 4) {
-                start = 0;
-                end = 9;
-            } else if (index > n - 5) {
-                start = n - 9;
-                end = n;
-            } else {
-                start = index - 4;
-                end = index + 5;
+        const reorder = function () {
+            const type = d3.select(this).property('value');
+            if (type == 'name') {
+                data.sort((a, b) => {
+                    if(a.Entity < b.Entity) { return 1; }
+                    if(a.Entity > b.Entity) { return -1; }
+                    return 0;
+                })
             }
-            const newData = data.slice(start, end);
-            updateBars(newData, selctedEntity);
+            else if (type == 'water') {
+                data.sort((a, b) => a.Water - b.Water);
+            }
+
+            updateBars(data);
         };
 
-        d3.select("#EntitySelector")
-            .on("change", update);
+        d3.selectAll(("input[name='options']"))
+            .on("change", reorder);
 
-        updateBars(initialData);
+        // d3.select("#EntitySelector")
+        //     .on("change", update);
+
+        updateBars(data);
 
         document.getElementById("vis").appendChild(svg.node());
     });
