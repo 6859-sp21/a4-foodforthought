@@ -282,23 +282,20 @@ function draw_bar() {
     clean();
 
     d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").then((data) => {
-        // sort button
-
         // 1. Sort data.
-        waterUsed = 3413
         data.forEach(d => d.Water = parseInt(d.Water, 10));
         data.sort((a, b) => a.Water - b.Water);
         data.forEach((d, i) => d.Rank = i + 1);
-        var waterUsed;
+        var waterUsed = 0;
         var selected = [];
 
-        // 3. Create a SVG we will use to make our chart.
+        // 2. Create a SVG we will use to make our chart.
         // See https://developer.mozilla.org/en-US/docs/Web/SVG for more on SVGs.
         const svg = d3.select('#vis').select('svg')
             .attr('width', width)
             .attr('height', height);
 
-        // 4. Setting up scales.
+        // 3. Setting up scales.
         const xScale = d3.scaleLinear()
             .domain([0, d3.max(data, d => d.Water)])
             .range([margin.left, width - margin.right])
@@ -309,6 +306,7 @@ function draw_bar() {
             .range([height - margin.bottom, margin.top])
             .padding(0.1);
 
+        // 4. Setting up colors.
         const coloring = function (d, selected) {
             if (selected.includes(d.Entity)) {
                 return '#FF930E';
@@ -316,6 +314,7 @@ function draw_bar() {
             return '#1F77B4';
         }
 
+        // 5. Setting up tooltip.
         var tooltip = d3.select("#vis").append("div")
             .attr("class", "tooltip")
             .style("position", "absolute")
@@ -328,15 +327,6 @@ function draw_bar() {
         const xAxis = svg.append('g')
             .attr('transform', `translate(15, ${height - margin.bottom})`)
             .call(d3.axisBottom(xScale))
-        // Add x-axis title 'text' element.
-        // .append('text')
-        //     .attr('text-anchor', 'end')
-        //     .attr('fill', 'black')
-        //     .attr('font-size', '12px')
-        //     .attr('font-weight', 'bold')
-        //     .attr('x', width - margin.right)
-        //     .attr('y', -10)
-        //     .text('Water');
 
         svg.append('text')
             .attr('x', (width + margin.left) / 2)
@@ -348,20 +338,10 @@ function draw_bar() {
             .attr("fill", 'black')
             .text('Water Use (L/1000 kcal)');
 
-
         //7. Drawing our y-axis
         const yAxis = svg.append('g')
             .attr('transform', `translate(${margin.left + 15}, 0)`)
             .call(d3.axisLeft(yScale))
-        // Add y-axis title 'text' element.
-        // .append('text')
-        //     .attr('transform', `translate(20, ${margin.top}) rotate(-90)`)
-        //     .attr('text-anchor', 'end')
-        //     .attr("transform", "rotate(-90)")
-        //     .attr('fill', 'black')
-        //     .attr('font-size', '12px')
-        //     .attr('font-weight', 'bold')
-        //     .text('Entity');
 
         svg.append('text')
             .attr('transform', "rotate(-90)")
@@ -374,7 +354,6 @@ function draw_bar() {
             .attr("fill", 'black')
             .text('Food Commodity');
 
-
         //8.  Adding a background label for the number.
         const numberLabel = svg.append('text')
             .attr("text-anchor", "end")
@@ -386,14 +365,15 @@ function draw_bar() {
             .attr('font-size', 35)
             .text(waterUsed);
         const numberContext = svg.append('text')
-        .attr("text-anchor", "end")
-        .attr('x', width - margin.right)
-        .attr('y', margin.top + 110)
-        .attr('fill', '#000000')
-        .attr('font-family', 'Helvetica Neue, Arial')
-        .attr('font-weight', 700)
-        .attr('font-size', 35)
-        .text(waterUsed);
+            .attr("text-anchor", "end")
+            .attr('x', width - margin.right)
+            .attr('y', margin.top + 110)
+            .attr('fill', '#000000')
+            .attr('font-family', 'Helvetica Neue, Arial')
+            .attr('font-weight', 700)
+            .attr('font-size', 35)
+            .text(waterUsed);
+
         
         const updateBars = function (data, selected) {
             // First update the y-axis domain to match data
@@ -402,8 +382,6 @@ function draw_bar() {
 
             yScale.domain(data.map(d => d.Entity));
             yAxis.transition().duration(1000).call(d3.axisLeft(yScale));
-
-            //xAxisHandleForUpdate.call(xAxis);
 
             const bars = svg
                 .selectAll(".bar")
@@ -426,15 +404,11 @@ function draw_bar() {
                         .style("left", (event.clientX - 600) + "px")
                         .style("background", 'white')
                         .style("top", (event.clientY) + "px");
-
-                    //.attr("d", symbol.size(64 * 4));
                 })
                 .on("mouseout", function (event, d) {
                     tooltip.transition()
                         .duration(500)
                         .style("opacity", 0);
-
-                    //.attr("d", symbol.size(64));
                 });
 
             // Update old ones, already have x / width from before
@@ -484,9 +458,16 @@ function draw_bar() {
                 }
             });
             if (filter.length == 0) {
-                selected = []
+                selected = [];
             }
-            console.log(selected);
+
+            waterUsed = 0
+            data.forEach(d => {
+                if (selected.includes(d.Entity)) {
+                    waterUsed += d.Water;
+                }
+            });
+
             updateBars(data, selected);
         }
 
@@ -496,11 +477,7 @@ function draw_bar() {
         d3.selectAll(("input[name='options']"))
             .on("change", reorder);
 
-        // d3.select("#EntitySelector")
-        //     .on("change", update);
-
         updateBars(data, selected);
-
         document.getElementById("vis").appendChild(svg.node());
     });
 
