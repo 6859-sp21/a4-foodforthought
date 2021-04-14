@@ -8,7 +8,7 @@ d3.select("#vis")
     .attr('height', height + margin.top + margin.bottom)
     .attr('opacity', 1)
 
-draw_tree();
+draw_title();
 
 const asc = arr => arr.sort((a, b) => a - b);
 
@@ -49,6 +49,18 @@ var BrowserText = (function () {
     };
 })();
 
+function draw_title() {
+    clean();
+    const svg = d3.select('#vis').select('svg')
+        .attr('width', width)
+        .attr('height', height)
+        .append('image')
+        .attr('href', 'https://www.world-grain.com/ext/resources/Article-Images/2019/11/Ceres_Water-scarcity_Photo-cred-Ceres_E.jpg?1573477827')
+        .attr('width', '100%')
+        .attr('height', '100%')
+        .attr('x', 0)
+        .attr('y', margin.top)
+}
 
 function draw_hist() {
     clean();
@@ -70,7 +82,7 @@ function draw_hist() {
                 .attr('class', 'graph-button')
                 .attr('id', (d) => d.replace(/\s/g, ''))
                 .on('change', update)
-                .property('checked', true);
+                .property('checked', (d) => (['Beef', 'Coffee', 'Maize'].some((x) => x === d.replace(/\s/g, ''))));
 
             lbl.append('span').text((d) => d)
 
@@ -81,6 +93,7 @@ function draw_hist() {
 
 
             function update() {
+
                 margin.top = margin.top + 100
 
                 d3.select('#food-desc').html("")
@@ -98,7 +111,7 @@ function draw_hist() {
                     x_max = Math.max(x_max, quantile(newData[comm], 0.8))
                 }
 
-                var x_min = -0.05 * x_max
+                var x_min = -0.1 * x_max
                 // var x_min = -5, x_max = 20;
 
                 console.log('min and max')
@@ -116,8 +129,21 @@ function draw_hist() {
 
                 const used_commodities = Object.keys(newData);
                 const num_commodities = Object.keys(newData).length;
+
+
+                if(num_commodities === 0){
+                    svg.append('text').text('Please Select Some Commodities')
+                        .attr('font-family', 'Helvetica Neue, Arial')
+                        .attr('font-weight', 700)
+                        .attr('font-size', 25)
+                        .attr("fill", 'black')
+                        .attr('x', width / 2 - 250)
+                        .attr('y', height / 2 - 100);
+
+                }
+
                 var comm_num = 0;
-                
+
                 var food_desc = {
                     "Beef": "Largest distribution and highest median land use; represents 22% of meat production, but 37% of all agricultural GHG emissions, suggesting serious gains in both land use and GHG emissions by reducing production and consumption.",
                     "Coffee": "Extremely sensitive to climate. Wet process methods may reduce land use and emissions but compromise on water use.",
@@ -154,7 +180,7 @@ function draw_hist() {
 
                         svg.append('text')
                             .attr('x', width / 2 + margin.left - BrowserText.getWidth('Land Use (m²/kg of product)', 20, 'Helvetica Neue, Arial'))
-                            .attr('y', height)
+                            .attr('y', y(0) + 0.3 * margin.top)
                             .attr('font-family', 'Helvetica Neue, Arial')
                             .attr('font-weight', 700)
                             .attr('font-size', 20)
@@ -175,6 +201,8 @@ function draw_hist() {
                         .attr('font-size', 30)
                         .attr("fill", colorScale(comm))
                         .text(comm);
+
+
 
                     // Plot the area
                     var curve = svg
@@ -197,7 +225,17 @@ function draw_hist() {
                             })
                         ).attr('opacity', 0);
 
+                    var medians = svg.append('circle')
+                        .attr('cx', x(d3.median(indicator)))
+                        .attr('cy', y(graph_ymax * 0.1))
+                        .attr('r', 5)
+                        .attr('fill', 'white')
+                        .attr('stroke', 'black')
+                        .attr('stroke-width', 2)
+                        .attr('opacity', 0)
+
                     curve.transition().duration(300).ease(d3.easeLinear).attr('opacity', 1)
+                    medians.transition().duration(300).ease(d3.easeLinear).attr('opacity', 1)
 
                     comm_num += 1;
                 }
@@ -255,7 +293,7 @@ function draw_bar() {
         var WaterUsed;
 
         // create the drop down menu of foods
-        var selector = d3.select("#vis")
+        var selector = d3.select("#water-down")
             .append("select")
             .attr("id", "EntitySelector")
             .selectAll("option")
@@ -317,14 +355,14 @@ function draw_bar() {
         //     .text('Water');
 
         svg.append('text')
-        .attr('x', (width + margin.left) / 2)
-        .attr('y', height - 5)
-        .attr('text-anchor', 'middle')
-        .attr('font-family', 'Helvetica Neue, Arial')
-        .attr('font-weight', 700)
-        .attr('font-size', 20)
-        .attr("fill", 'black')
-        .text('Water Use (L/1000 kcal)');
+            .attr('x', (width + margin.left) / 2)
+            .attr('y', height - 5)
+            .attr('text-anchor', 'middle')
+            .attr('font-family', 'Helvetica Neue, Arial')
+            .attr('font-weight', 700)
+            .attr('font-size', 20)
+            .attr("fill", 'black')
+            .text('Water Use (L/1000 kcal)');
 
 
         //7. Drawing our y-axis
@@ -342,15 +380,15 @@ function draw_bar() {
         //     .text('Entity');
 
         svg.append('text')
-        .attr('transform', "rotate(-90)")
-        .attr('x', - ((height - margin.bottom) / 2) -50)
-        .attr('y', 15)
-        .attr('text-anchor', 'middle')
-        .attr('font-family', 'Helvetica Neue, Arial')
-        .attr('font-weight', 700)
-        .attr('font-size', 20)
-        .attr("fill", 'black')
-        .text('Food Commodity');
+            .attr('transform', "rotate(-90)")
+            .attr('x', -((height - margin.bottom) / 2) - 50)
+            .attr('y', 15)
+            .attr('text-anchor', 'middle')
+            .attr('font-family', 'Helvetica Neue, Arial')
+            .attr('font-weight', 700)
+            .attr('font-size', 20)
+            .attr("fill", 'black')
+            .text('Food Commodity');
 
 
         //8.  Adding a background label for the number.
@@ -364,14 +402,14 @@ function draw_bar() {
             .attr('font-size', 35)
             .text(WaterUsed);
         const numberContext = svg.append('text')
-        .attr("text-anchor", "end")
-        .attr('x', width - margin.right)
-        .attr('y', margin.top + 110)
-        .attr('fill', '#000000')
-        .attr('font-family', 'Helvetica Neue, Arial')
-        .attr('font-weight', 700)
-        .attr('font-size', 35)
-        .text(WaterUsed);
+            .attr("text-anchor", "end")
+            .attr('x', width - margin.right)
+            .attr('y', margin.top + 110)
+            .attr('fill', '#000000')
+            .attr('font-family', 'Helvetica Neue, Arial')
+            .attr('font-weight', 700)
+            .attr('font-size', 35)
+            .text(WaterUsed);
         const updateBars = function (data, selected) {
             // First update the y-axis domain to match data
             console.log(data);
@@ -402,7 +440,7 @@ function draw_bar() {
                     tooltip.transition()
                         .duration(200)
                         .style("opacity", .9);
-                    tooltip.html("Food: " + d.Entity + "<br/> Water: " + d.Water)
+                    tooltip.html("Food: " + d.Entity + "<br/> Water: " + d.Water + "L/1000 kcal")
                         .style("left", (event.clientX - 600) + "px")
                         .style("background", 'white')
                         .style("top", (event.clientY) + "px");
@@ -434,12 +472,10 @@ function draw_bar() {
                 .transition()
                 .duration(1000)
             numberContext
-                .text(Number((WaterUsed/300).toFixed(2)) + ' bathtubs/meal')
+                .text(Number((WaterUsed / 300).toFixed(2)) + ' bathtubs/meal')
                 .transition()
                 .duration(1000)
         };
-
-
 
 
         const update = function () {
@@ -486,6 +522,7 @@ function draw_bar() {
 
 
 let activationFunctions = [
+    draw_title,
     draw_tree,
     draw_bar,
     draw_hist,
@@ -711,7 +748,7 @@ function main(o, data) {
             .text(function (d) {
                 return d.key + " (" + formatNumber(d.value) + "\%)";
             })
-           .attr("font-family", "Arial")
+            .attr("font-family", "Arial")
             .call(text2);
 
         g.append("rect")
@@ -733,7 +770,7 @@ function main(o, data) {
             .text(function (d) {
                 return formatNumber(d.value) + "\%";
             })
-           .attr("font-family", "Arial");
+            .attr("font-family", "Arial");
         t.call(text);
 
         g.selectAll("rect")
@@ -827,7 +864,7 @@ function main(o, data) {
 
     function name(d) {
         return d.parent
-         ? name(d.parent) + " / " + d.key + " (" + formatNumber(d.value) + "\%)"
+            ? name(d.parent) + " / " + d.key + " (" + formatNumber(d.value) + "\%)"
             : d.key + " (" + formatNumber(d.value) + "\%)";
     }
 }

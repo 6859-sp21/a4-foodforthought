@@ -25,15 +25,15 @@
 
     <style>
         #buttons {
-            margin:4px;
-            border-radius:4px;
-            overflow:auto;
-            float:left;
+            margin: 4px;
+            border-radius: 4px;
+            overflow: auto;
+            float: left;
         }
 
         #buttons label {
-            float:left;
-            width:7.0em;
+            float: left;
+            width: 7.0em;
             margin: 5px;
         }
 
@@ -42,8 +42,8 @@
             justify-content: center;
             align-items: center;
 
-            text-align:center;
-            padding:3px 0px;
+            text-align: center;
+            padding: 3px 0px;
             height: 50px;
         }
 
@@ -54,13 +54,13 @@
         }
 
         #buttons input:checked + span {
-            background-color:#911;
-            color:#fff;
+            background-color: #911;
+            color: #fff;
         }
 
-        #buttons input:checked + span:hover {
-            background-color: #9f5252;
-            color:#fff;
+        #buttons input:hover + span {
+            background-color: #c87575;
+            color: #fff;
         }
 
 
@@ -71,6 +71,7 @@
             margin-top: 6px;
             margin-bottom: 6px;
         }
+
         /*text {*/
         /*    pointer-events: none;*/
         /*}*/
@@ -84,9 +85,10 @@
             margin-right: auto;
             max-width: 50%;
             max-height: 20%;
-            }
+        }
+
         h1 {
-            font-family: Helvetica, Arial,sans-serif;
+            font-family: Helvetica, Arial, sans-serif;
             font-weight: bold;
             font-size: 40px;
             text-align: center;
@@ -94,26 +96,31 @@
             margin-bottom: 6px;
 
         }
-        h2{
-            font-family: Helvetica, Arial,sans-serif;
+
+        h2 {
+            font-family: Helvetica, Arial, sans-serif;
             font-size: 30px;
             font-style: bold;
             text-align: center;
         }
-        h3{
-            font-family: Helvetica, Arial,sans-serif;
+
+        h3 {
+            font-family: Helvetica, Arial, sans-serif;
             font-size: 24px;
             font-style: bold;
         }
-        h4, p, span{
-            font-family: Helvetica, Arial,sans-serif;
+
+        h4, p, span {
+            font-family: Helvetica, Arial, sans-serif;
             font-size: 18px;
         }
-        h5{
-            font-family: Helvetica, Arial,sans-serif;
+
+        h5 {
+            font-family: Helvetica, Arial, sans-serif;
             font-size: 10px;
             font-style: italic;
         }
+
         rect {
             stroke: #fff;
         }
@@ -161,51 +168,94 @@
 <div id="graphic">
     <div id="sections">
         <section class="step">
-            <div class="title"></div>
-            <br><br>
             <h1>Food for Thought</h1>
             <h2>The Environmental Impacts of Your Diet</a></h2>
-            <h5>This interactive, scrollable data visualization will take you on a journey through the environmental impacts of food production to help you understand the footprint of your own diet. Scroll down to read more about GHG emissions, water use, and land use from different foods and explore visuals that bring these topics to life.
-                Note: If the visualization doesn't fit your screen, try zooming out with ctrl + - / Cmd + -.) </h5>
+            <p>This interactive, scrollable data visualization will take you on a journey through the environmental
+                impacts of food production to help you understand the footprint of your own diet. Scroll down to read
+                more about GHG emissions, water use, and land use from different foods and explore visuals that bring
+                these topics to life.</p>
+
+            <p> Note: If the visualization doesn't fit your screen, try zooming out with Ctrl + - / Cmd + -. </p>
+            <p><b>Data Source:</b> <a href="https://science.sciencemag.org/content/360/6392/987">Reducing food’s
+
+                environmental impacts through producers and consumers</a></p>
+            <p><b>Inspiration:</b><a href="https://ourworldindata.org/environmental-impacts-of-food">Our World in
+                Data</a></p>
+
+        </section>
+
+        <section class="step">
             <h3>1. Food Contributes Nearly a Third of Global GHG Emissions</h3>
             <p>
-                We often think about our transportation, electricity, and energy use as the main contributors to global greenhouse gas (GHG) emissions, which are major contributors to global warming and climate change. However, <b>food production and consumption make up nearly a third of global emissions</b> and also contribute significantly to land and water use. Explore the treemap on the right to understand the breakdown of GHG emissions across categories. Click a box to zoom in and click the top bar to zoom out one level. To learn more about GHG emissions, click the icon below. 
+                We often think about our transportation, electricity, and energy use as the main contributors to global
+                greenhouse gas (GHG) emissions, which are major contributors to global warming and climate change.
+                However, <b>food production and consumption make up nearly a third of global emissions</b> and also
+                contribute significantly to land and water use. Explore the treemap on the right to understand the
+                breakdown of GHG emissions across categories. Click a box to zoom in and click the top bar to zoom out
+                one level. To learn more about GHG emissions, click the icon below.
 
             </p>
-            <a href = "https://www.epa.gov/ghgemissions/overview-greenhouse-gases" target="_blank" rel="noopener noreferrer">
-                <img src="ghg_icon.png" alt="Icon of CO2 in a cloud" class="icon" max_width="35%"></img>  
-            </a>      
+            <a href="https://www.epa.gov/ghgemissions/overview-greenhouse-gases" target="_blank"
+               rel="noopener noreferrer">
+                <img src="ghg_icon.png" alt="Icon of CO2 in a cloud" class="icon" max_width="35%"></img>
+            </a>
         </section>
         <section class="step">
             <br><br>
             <h3>2. Farmed Prawn and Fish Use the Greatest Amounts of Freshwater</h3>
             <p>
-                In addition to GHG emissions, everything you eat also consumes water. This is a factor we often don’t consider when trying to understand environmental impact, but the reality is that freshwater is one of our scarcest resources. Let’s take a closer look the freshwater withdrawal needed to produce 1000 calories of a food product. Select or search for a food product in the dropdown menu below to highlight it on the graph to the right. The bar chart y-axis is ranked by the relative amounts of water use by product (e.g., Prawn is ranked #1 because it uses the most water per 1000 kcal). For context, the label on the graph also gives you an idea of how many bathtubs of water are used per meal of the selected food product. As you can see by exploring the visual, <b>farmed prawn and fish are the top consumers of water</b> out of the 35 food products represented. To learn more about water use in agriculture, click the icon below.
+                In addition to GHG emissions, everything you eat also consumes water. This is a factor we often don’t
+                consider when trying to understand environmental impact, but the reality is that freshwater is one of
+                our scarcest resources. Let’s take a closer look the freshwater withdrawal needed to produce 1000
+                calories of a food product. Select or search for a food product in the dropdown menu below to highlight
+                it on the graph to the right.
             </p>
-            <a href = "https://www.worldbank.org/en/topic/water-in-agriculture" target="_blank" rel="noopener noreferrer">
-            <img src="water_icon.png" alt="Icon of water droplet" class='icon'></img>        
-            <svg id='legend' width='400px' height='500px'></svg>
+
+            <div id="water-down">
+
+            </div>
+
+            <p>The bar chart y-axis is ranked by the relative amounts of water use by
+                product (e.g., Prawn is ranked #1 because it uses the most water per 1000 kcal). For context, the label
+                on the graph also gives you an idea of how many bathtubs of water are used per meal of the selected food
+                product. As you can see by exploring the visual, <b>farmed prawn and fish are the top consumers of
+                water</b> out of the 35 food products represented. To learn more about water use in agriculture, click
+                the icon below.
+            </p>
+            <a href="https://www.worldbank.org/en/topic/water-in-agriculture" target="_blank" rel="noopener noreferrer">
+                <img src="water_icon.png" alt="Icon of water droplet" class='icon'></img>
             </a>
         </section>
         <section class='step'>
-<!--            <svg id='legend2' width='400px' height='450px'></svg>-->
+            <!--            <svg id='legend2' width='400px' height='450px'></svg>-->
             <br><br>
             <h3>3. Beef Has the Largest Distribution of Land Use</h3>
             <p>
-                Similar to water use, land use is another often overlooked factor that causes significant environmental degradation. Select some products of interest below by clicking the buttons (by default, they are all selected). The graph on the right will automatically scale to display the land use distribution of farms in the dataset per kg of product. The circles represent the median land use. Some products have portions of the distribution with negative land use: this is because the processes used by these farms offset land use through reuse, crop rotation, or other methods, causing a net negative amount of land use. As you can see, <b>beef has the largest land use distribution and highest median land use by far.</b> We’ve included more information for each product to help you understand their impact in more detail. To learn more about land use in agriculture, click the icon below.             
-            </p>
-            <a href = "https://ourworldindata.org/land-use#:~:text=There%20are%20two%20main%20uses,pastures%20used%20for%20livestock%20rearing).&text=For%20most%20countries%2C%20land%20dedicated,dedicating%20less%20than%2010%20percent." target="_blank" rel="noopener noreferrer">
-            <img src="land_icon.png" alt="Icon of plants and a house, indicating land use" class = "icon"></img>  
-            </a>      
+                Similar to water use, land use is another often overlooked factor that causes significant environmental
+                degradation. Select some products of interest below by clicking the buttons. </p>
+
             <div id="buttons">
 
             </div>
 
-            <div id="food-desc" style="height: 1500px">
+            <p>    The graph on the right will automatically scale to display the land use distribution of farms
+                in the dataset per kg of product. The circles represent the median land use. Some products have portions
+                of the distribution with negative land use: this is because the processes used by these farms offset
+                land use through reuse, crop rotation, or other methods, causing a net negative amount of land use. As
+                you can see, <b>beef has the largest land use distribution and highest median land use by far.</b> We’ve
+                included more information for each product to help you understand their impact in more detail. To learn
+                more about land use in agriculture, click the icon at the bottom of the page.
+            </p>
+
+            <div id="food-desc">
 
             </div>
-            <p>Data Source: <a href="https://science.sciencemag.org/content/360/6392/987">Reducing food’s environmental impacts through producers and consumers</a></p>
-            <p>Inspiration: <a href="https://ourworldindata.org/environmental-impacts-of-food">Our World in Data</a></p>
+
+            <a href="https://ourworldindata.org/land-use#:~:text=There%20are%20two%20main%20uses,pastures%20used%20for%20livestock%20rearing).&text=For%20most%20countries%2C%20land%20dedicated,dedicating%20less%20than%2010%20percent."
+               target="_blank" rel="noopener noreferrer">
+                <img src="land_icon.png" alt="Icon of plants and a house, indicating land use" class="icon"></img>
+            </a>
+
 
         </section>
     </div>
