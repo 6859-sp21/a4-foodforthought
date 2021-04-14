@@ -117,11 +117,24 @@ function draw_hist() {
                 const used_commodities = Object.keys(newData);
                 const num_commodities = Object.keys(newData).length;
                 var comm_num = 0;
+                
+                var food_desc = {
+                    "Beef": "Largest distribution and highest median land use; represents 22% of meat production, but 37% of all agricultural GHG emissions, suggesting serious gains in both land use and GHG emissions by reducing production and consumption.",
+                    "Coffee": "Extremely sensitive to climate. Wet process methods may reduce land use and emissions but compromise on water use.",
+                    "Maize": "Yields are expected to decline 10% by 2050 due to climate change. To reduce land use, using better seed and polyculture are promising techniques.",
+                    "Palm Oil": "Generally poorly reported data. Contributes significantly to deforestation and slavery, despite seemingly low water and land use.",
+                    "Poultry Meat": "Second most widely meat in the world. Lower land use than beef, but should reduce waste and emissions to mitigate environmental harm.",
+                    "Roundwood": "Critical to paper production. Shows a negative trade-off between emissions and land use but co-benefits of reducing emissions and water use.",
+                    "Salmon": "Fastest growing food production system worldwide. Reducing the use of animal by-products in feed may mitigate environmental harm from land use.",
+                    "Shrimp": "Second most popular seafood in the U.S. The best way to improve shrimp farming is to reduce intensity of production.",
+                    "Soybeans": "Soy is most used in animal feed, not as a human protein. GHG emissions in Latin America are directly correlated with land use, and addressing one factor is a co-benefit for the other.",
+                }
 
                 for (var comm of Object.keys(newData)) {
                     d3.select('#food-desc').append('h4')
                         .text(comm)
-
+                    d3.select('#food-desc').append('p')
+                        .text(food_desc[comm])
                     console.log(`Commodity (#${comm_num}) = ${comm}`);
                     indicator = newData[comm];
 
@@ -276,9 +289,9 @@ function draw_bar() {
 
         const coloring = function (d, selected) {
             if (d.Entity == selected) {
-                return '#ff8769';
+                return '#FF930E';
             }
-            return '#65d5db';
+            return '#1F77B4';
         }
 
         var tooltip = d3.select("#vis").append("div")
