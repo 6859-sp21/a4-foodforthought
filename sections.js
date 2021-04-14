@@ -292,7 +292,6 @@ function draw_bar() {
         var WaterUsed;
 
         // create the drop down menu of foods
-<<<<<<< HEAD
         // var selector = d3.select("#vis")
         //     .append("select")
         //     .attr("id", "EntitySelector")
@@ -305,20 +304,6 @@ function draw_bar() {
         //     .attr("value", function (d, i) {
         //         return i;
         //     });
-=======
-        var selector = d3.select("#water-down")
-            .append("select")
-            .attr("id", "EntitySelector")
-            .selectAll("option")
-            .data(data)
-            .enter().append("option")
-            .text(function (d) {
-                return d.Entity;
-            })
-            .attr("value", function (d, i) {
-                return i;
-            });
->>>>>>> 16c19fd0ee2171bb061f0c40920e41c775d3903d
 
         // 2. Setting up variables that describe our chart's space.
 
@@ -416,7 +401,6 @@ function draw_bar() {
             .attr('font-size', 35)
             .text(WaterUsed);
         const numberContext = svg.append('text')
-<<<<<<< HEAD
         .attr("text-anchor", "end")
         .attr('x', width - margin.right)
         .attr('y', margin.top + 110)
@@ -429,16 +413,6 @@ function draw_bar() {
         
         
         
-=======
-            .attr("text-anchor", "end")
-            .attr('x', width - margin.right)
-            .attr('y', margin.top + 110)
-            .attr('fill', '#000000')
-            .attr('font-family', 'Helvetica Neue, Arial')
-            .attr('font-weight', 700)
-            .attr('font-size', 35)
-            .text(WaterUsed);
->>>>>>> 16c19fd0ee2171bb061f0c40920e41c775d3903d
         const updateBars = function (data, selected) {
             // First update the y-axis domain to match data
             xScale.domain([0, d3.max(data, d => d.Water)]);
@@ -466,11 +440,7 @@ function draw_bar() {
                     tooltip.transition()
                         .duration(200)
                         .style("opacity", .9);
-<<<<<<< HEAD
                     tooltip.html("Rank: " + d.Rank + "<br/> Food: " + d.Entity + "<br/> Water: " + d.Water)
-=======
-                    tooltip.html("Food: " + d.Entity + "<br/> Water: " + d.Water + "L/1000 kcal")
->>>>>>> 16c19fd0ee2171bb061f0c40920e41c775d3903d
                         .style("left", (event.clientX - 600) + "px")
                         .style("background", 'white')
                         .style("top", (event.clientY) + "px");
@@ -507,7 +477,6 @@ function draw_bar() {
                 .duration(1000)
         };
 
-<<<<<<< HEAD
         const reorder = function () {
             const type = d3.select(this).property('value');
             if (type == 'name') {
@@ -519,24 +488,6 @@ function draw_bar() {
             }
             else if (type == 'water') {
                 data.sort((a, b) => a.Water - b.Water);
-=======
-
-        const update = function () {
-            const n = data.length;
-            const index = parseInt(d3.select(this).property('value'), 10);
-            var start, end;
-            const selctedEntity = data[index].Entity;
-            WaterUsed = data[index].Water;
-            if (index < 4) {
-                start = 0;
-                end = 9;
-            } else if (index > n - 5) {
-                start = n - 9;
-                end = n;
-            } else {
-                start = index - 4;
-                end = index + 5;
->>>>>>> 16c19fd0ee2171bb061f0c40920e41c775d3903d
             }
 
             updateBars(data);
