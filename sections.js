@@ -295,6 +295,15 @@ function draw_bar() {
             .attr('width', width)
             .attr('height', height);
 
+        // Clippath for zooming
+        svg.append("clipPath")
+            .attr("id", 'my-clip-path')
+            .append("rect")
+                .attr("x", -100)
+                .attr("y", margin.top)
+                .attr("width", width - margin.left - margin.right)
+                .attr("height", height - margin.top - margin.bottom);
+
         // 3. Setting up scales.
         const xScale = d3.scaleLinear()
             .domain([0, d3.max(data, d => d.Water)])
@@ -324,9 +333,15 @@ function draw_bar() {
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
         //6. Drawing our x-axis
-        const xAxis = svg.append('g')
-            .attr('transform', `translate(15, ${height - margin.bottom})`)
+        const x = function(g) {
+            g.attr('transform', `translate(15, ${height - margin.bottom})`)
             .call(d3.axisBottom(xScale))
+            .call(g => g.select(".domain").remove())
+        }
+    
+        const xAxis = svg.append('g')
+                        .attr("class", "x-axis")
+                        .call(x)
 
         svg.append('text')
             .attr('x', (width + margin.left) / 2)
@@ -339,9 +354,15 @@ function draw_bar() {
             .text('Water Use (L/1000 kcal)');
 
         //7. Drawing our y-axis
+        const y = function(g, yScale) {
+            g.attr('transform', `translate(${margin.left + 15}, 0)`)
+            .call(d3.axisLeft(yScale).ticks(width / 80).tickSizeOuter(0))
+        }
+    
         const yAxis = svg.append('g')
-            .attr('transform', `translate(${margin.left + 15}, 0)`)
-            .call(d3.axisLeft(yScale))
+            .attr("class", "y-axis")
+            .attr('clip-path','url(#my-clip-path)')
+            .call(y, yScale)
 
         svg.append('text')
             .attr('transform', "rotate(-90)")
@@ -374,7 +395,7 @@ function draw_bar() {
             .attr('font-size', 35)
             .text(waterUsed);
 
-        
+        // 9. update bars
         const updateBars = function (data, selected) {
             // First update the y-axis domain to match data
             xScale.domain([0, d3.max(data, d => d.Water)]);
@@ -390,6 +411,7 @@ function draw_bar() {
             // Add bars for new data
             bars.enter()
                 .append("rect")
+                .attr('clip-path','url(#my-clip-path)')
                 .attr("class", "bar")
                 .attr('x', margin.left + 15)
                 .attr('y', d => yScale(d.Entity))
@@ -433,6 +455,7 @@ function draw_bar() {
                 .duration(1000)
         };
 
+        // 10. reoder bars
         const reorder = function () {
             const type = d3.select(this).property('value');
             if (type == 'name') {
@@ -446,9 +469,14 @@ function draw_bar() {
                 data.sort((a, b) => a.Water - b.Water);
             }
 
+            svg.transition()
+            .delay("1000")
+            .duration(750)
+            .call(zoom.transform, d3.zoomIdentity);
             updateBars(data, selected);
         };
 
+        // 11. highlight the searched bars
         const search = function() {
             const filter = d3.select(this).property('value').toUpperCase();
             selected = []
@@ -468,6 +496,9 @@ function draw_bar() {
                 }
             });
 
+            svg.transition()
+            .duration(750)
+            .call(zoom.transform, d3.zoomIdentity);
             updateBars(data, selected);
         }
 
@@ -476,6 +507,21 @@ function draw_bar() {
 
         d3.selectAll(("input[name='options']"))
             .on("change", reorder);
+
+        // 12. zoom function
+        const zoom = d3.zoom()
+        .scaleExtent([1, 32])
+        .extent([[margin.left, 0], [width - margin.right, height]])
+        .translateExtent([[margin.left, 0], [width - margin.right, height]])
+        .on("zoom", zoomed);
+    
+        function zoomed(event) {
+            yScale.range([height - margin.bottom, margin.top].map(d => event.transform.applyY(d)));
+            svg.selectAll(".bar").attr("y", d => yScale(d.Entity)).attr("height", yScale.bandwidth());
+            yAxis.call(y, yScale);
+        }
+
+        svg.call(zoom);
 
         updateBars(data, selected);
         document.getElementById("vis").appendChild(svg.node());

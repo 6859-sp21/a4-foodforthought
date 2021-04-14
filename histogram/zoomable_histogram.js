@@ -32,7 +32,7 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").
         .attr('height', height);
 
 
-    const defs = svg.append('defs')
+    //const defs = svg.append('defs')
 
     // // use clipPath
     // defs.append('clipPath')
@@ -219,9 +219,6 @@ d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").
 
     function zoomed(event) {
         console.log(event.transform.rescaleY)
-        //const newYScale = event.transform.rescaleY(yScale);
-        // const xz = event.transform.rescaleX(xScale);
-        // const yz = event.transform.rescaleY(yScale);
         yScale.range([height - margin.bottom, margin.top].map(d => event.transform.applyY(d)));
         svg.selectAll(".bar").attr("y", d => yScale(d.Entity)).attr("height", yScale.bandwidth());
         yAxis.call(y, yScale);

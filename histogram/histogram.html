@@ -20,7 +20,16 @@
   <body>
     <h1>Histogram</h1>
     <button onclick="show()">show</button>
-    <div id="chart" style="width:420px;height:420px;">
+    <div id='toggle_order'>
+      <input id="search" type="text" placeholder="Search..">
+      <label>
+        <input type="radio" name="options" value="name"> Sort Alphabetically
+      </label>
+      <label>
+        <input type="radio" name="options" value="water" checked> Sort by Water Use
+      </label>
+  </div>
+    <div id="vis" style="width:420px;height:420px;">
       <!-- This is where we will put our chart. -->
     </div>
 
