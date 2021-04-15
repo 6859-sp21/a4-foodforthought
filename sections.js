@@ -254,6 +254,8 @@ function clean() {
     // d3.selectAll('.graph-button').remove()
     d3.selectAll('#EntitySelector').remove()
     d3.selectAll('.tooltip').remove()
+    d3.selectAll('.zoom-panel').remove()
+    svg.on('.zoom', null);
 }
 
 //First draw function
