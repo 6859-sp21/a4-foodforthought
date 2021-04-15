@@ -23,6 +23,64 @@
     <title>Food for Thought</title>
 
     <style>
+        form {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 18px;
+            margin-top: 18px;
+            background-color: #f2e9e9;
+
+            padding: 10px;
+        }
+
+        #search {
+            width: 100%;
+        }
+
+        #search-label {
+            display: block;
+            width: auto;
+        }
+
+        input[type=text] {
+            border: 1px;
+            border-style: solid;
+            width: 100%;
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 18px;
+        }
+
+        input[type=text]:hover {
+            border-color: #c87575;
+        }
+
+        input[type=text]:focus {
+            border-color: #911;
+        }
+
+        #reset {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 18px;
+            background-color: white;
+            color: black;
+            border: 1px solid #555555;
+        }
+
+        #reset:hover {
+            background-color: #c87575;
+            color: #fff;
+        }
+
+        #reset:active {
+            background-color: #911;
+            color: #fff;
+        }
+
+        rect.zoom-panel {
+            cursor: move;
+            fill: #fff;
+            pointer-events: all;
+        }
+        
         #buttons {
             margin: 4px;
             border-radius: 4px;
@@ -206,33 +264,38 @@
                 In addition to GHG emissions, everything you eat also consumes water. This is a factor we often don’t
                 consider when trying to understand environmental impact, but the reality is that freshwater is one of
                 our scarcest resources. Let’s take a closer look the freshwater withdrawal needed to produce 1000
-                calories of a food product. Select or search for a food product in the dropdown menu below to highlight
+                calories of a food product. Search for food products in the menu below to highlight
                 it on the graph to the right.
             </p>
-
-            <div id="water-down">
-
-            </div>
 
             <p>The bar chart y-axis is ranked by the relative amounts of water use by
                 product (e.g., Prawn is ranked #1 because it uses the most water per 1000 kcal). For context, the label
                 on the graph also gives you an idea of how many bathtubs of water are used per meal of the selected food
                 product. As you can see by exploring the visual, <b>farmed prawn and fish are the top consumers of
                 water</b> out of the 35 food products represented. To learn more about water use in agriculture, click
-                the icon below.
+                the waterdrop icon below.
             </p>
+
+            <form>
+                <label id="search-label" for="search">Search for food:</label>
+                <input id="search" type="text" placeholder="Type here...">
+                <br><br>
+                <label>Change the order by:</label>
+                <label>
+                  <input type="radio" name="options" value="name">name
+                </label>
+                <label>
+                  <input type="radio" name="options" value="water" checked>water use
+                </label>
+                <br><br>
+                <label>You can scroll on the graph to zoom in and zoom out or </label>
+                <button id="reset" type="button">Reset</button>
+                <label> here</label>
+            </form>
+
             <a href="https://www.worldbank.org/en/topic/water-in-agriculture" target="_blank" rel="noopener noreferrer">
                 <img src="water_icon.png" alt="Icon of water droplet" class='icon'></img>
             </a>
-            <div id='toggle_order'>
-                <input id="search" type="text" placeholder="Search..">
-                <label>
-                  <input type="radio" name="options" value="name"> Sort Alphabetically
-                </label>
-                <label>
-                  <input type="radio" name="options" value="water" checked> Sort by Water Use
-                </label>
-            </div>
         </section>
         <section class='step'>
             <!--            <svg id='legend2' width='400px' height='450px'></svg>-->

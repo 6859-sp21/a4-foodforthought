@@ -280,6 +280,7 @@ function draw_tree() {
 
 function draw_bar() {
     clean();
+    $('form :input').val('');
 
     d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").then((data) => {
         // 1. Sort data.
@@ -301,8 +302,15 @@ function draw_bar() {
             .append("rect")
                 .attr("x", -100)
                 .attr("y", margin.top)
-                .attr("width", width - margin.left - margin.right)
+                .attr("width", width + 100 + margin.left + margin.right)
                 .attr("height", height - margin.top - margin.bottom);
+        
+        svg.append('rect')
+            .attr('class', 'zoom-panel')
+            .attr("x", -100)
+            .attr("y", margin.top)
+            .attr('width', width)
+            .attr('height', height)
 
         // 3. Setting up scales.
         const xScale = d3.scaleLinear()
@@ -379,7 +387,7 @@ function draw_bar() {
         const numberLabel = svg.append('text')
             .attr("text-anchor", "end")
             .attr('x', width - margin.right)
-            .attr('y', margin.top + 60)
+            .attr('y', height - margin.bottom - 70)
             .attr('fill', '#000000')
             .attr('font-family', 'Helvetica Neue, Arial')
             .attr('font-weight', 700)
@@ -388,7 +396,7 @@ function draw_bar() {
         const numberContext = svg.append('text')
             .attr("text-anchor", "end")
             .attr('x', width - margin.right)
-            .attr('y', margin.top + 110)
+            .attr('y', height - margin.bottom - 20)
             .attr('fill', '#000000')
             .attr('font-family', 'Helvetica Neue, Arial')
             .attr('font-weight', 700)
@@ -423,8 +431,7 @@ function draw_bar() {
                         .duration(200)
                         .style("opacity", .9);
                     tooltip.html("Rank: " + d.Rank + "<br/> Food: " + d.Entity + "<br/> Water: " + d.Water)
-                        .style("left", (event.clientX - 600) + "px")
-                        .style("background", 'white')
+                        .style("left", (event.clientX - 650) + "px")
                         .style("top", (event.clientY) + "px");
                 })
                 .on("mouseout", function (event, d) {
@@ -510,16 +517,23 @@ function draw_bar() {
 
         // 12. zoom function
         const zoom = d3.zoom()
-        .scaleExtent([1, 32])
-        .extent([[margin.left, 0], [width - margin.right, height]])
-        .translateExtent([[margin.left, 0], [width - margin.right, height]])
-        .on("zoom", zoomed);
+            .scaleExtent([1, 32])
+            .extent([[margin.left, 0], [width - margin.right, height - margin.bottom]])
+            .translateExtent([[margin.left, 0], [width - margin.right, height - margin.bottom]])
+            .on("zoom", zoomed);
     
         function zoomed(event) {
             yScale.range([height - margin.bottom, margin.top].map(d => event.transform.applyY(d)));
             svg.selectAll(".bar").attr("y", d => yScale(d.Entity)).attr("height", yScale.bandwidth());
             yAxis.call(y, yScale);
         }
+
+        d3.selectAll(("button[id='reset']"))
+            .on("click", function() {
+                svg.transition()
+                .duration(750)
+                .call(zoom.transform, d3.zoomIdentity);
+            });
 
         svg.call(zoom);
 
