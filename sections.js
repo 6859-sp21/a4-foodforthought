@@ -324,7 +324,7 @@ function draw_bar() {
         .attr('font-weight', 700)
         .attr('font-size', 20)
         .attr("fill", 'black')
-        .text('Water Use (L/1000 kcal)');
+        .text('Water Use (L/1000 cal)');
 
 
         //7. Drawing our y-axis
@@ -430,7 +430,7 @@ function draw_bar() {
             bars.exit().remove();
 
             numberLabel
-                .text(WaterUsed + ' L/1000 kcal =')
+                .text(WaterUsed + ' L/1000 cal =')
                 .transition()
                 .duration(1000)
             numberContext
