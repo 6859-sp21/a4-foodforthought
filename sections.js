@@ -280,7 +280,8 @@ function draw_tree() {
 
 function draw_bar() {
     clean();
-    $('form :input').val('');
+    $('#search').val('');
+    $('input[name="options"]').prop("checked",true);
 
     d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").then((data) => {
         // 1. Sort data.
