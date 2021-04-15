@@ -22,7 +22,7 @@ body {
 
 .step {
     margin-bottom: 100px;
-    height: 700px;
+    height: auto;
     font-family: "Domine";
     font-weight: 400;
     line-height: 1.4em;
@@ -70,15 +70,17 @@ strong {
 
 div.tooltip {
     position: absolute;
-    text-align: center;
+    text-align: left;
     width: auto;
     height: auto;
     padding: 2px;
-    font: 12px sans-serif;
-    /* background: lightsteelblue; */
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    background: #f2e9e9;
     border: 0px;
     border-radius: 8px;
     pointer-events: none;
+    padding: 5px;
 }
 
 svg circle:hover{

@@ -8,7 +8,7 @@ d3.select("#vis")
     .attr('height', height + margin.top + margin.bottom)
     .attr('opacity', 1)
 
-draw_tree();
+draw_title();
 
 const asc = arr => arr.sort((a, b) => a - b);
 
@@ -49,6 +49,18 @@ var BrowserText = (function () {
     };
 })();
 
+function draw_title() {
+    clean();
+    const svg = d3.select('#vis').select('svg')
+        .attr('width', width)
+        .attr('height', height)
+        .append('image')
+        .attr('href', 'https://www.world-grain.com/ext/resources/Article-Images/2019/11/Ceres_Water-scarcity_Photo-cred-Ceres_E.jpg?1573477827')
+        .attr('width', '100%')
+        .attr('height', '100%')
+        .attr('x', 0)
+        .attr('y', margin.top)
+}
 
 function draw_hist() {
     clean();
@@ -70,7 +82,7 @@ function draw_hist() {
                 .attr('class', 'graph-button')
                 .attr('id', (d) => d.replace(/\s/g, ''))
                 .on('change', update)
-                .property('checked', true);
+                .property('checked', (d) => (['Beef', 'Coffee', 'Maize'].some((x) => x === d.replace(/\s/g, ''))));
 
             lbl.append('span').text((d) => d)
 
@@ -81,6 +93,7 @@ function draw_hist() {
 
 
             function update() {
+
                 margin.top = margin.top + 100
 
                 d3.select('#food-desc').html("")
@@ -98,7 +111,7 @@ function draw_hist() {
                     x_max = Math.max(x_max, quantile(newData[comm], 0.8))
                 }
 
-                var x_min = -0.05 * x_max
+                var x_min = -0.1 * x_max
                 // var x_min = -5, x_max = 20;
 
                 console.log('min and max')
@@ -116,8 +129,21 @@ function draw_hist() {
 
                 const used_commodities = Object.keys(newData);
                 const num_commodities = Object.keys(newData).length;
+
+
+                if(num_commodities === 0){
+                    svg.append('text').text('Please Select Some Commodities')
+                        .attr('font-family', 'Helvetica Neue, Arial')
+                        .attr('font-weight', 700)
+                        .attr('font-size', 25)
+                        .attr("fill", 'black')
+                        .attr('x', width / 2 - 250)
+                        .attr('y', height / 2 - 100);
+
+                }
+
                 var comm_num = 0;
-                
+
                 var food_desc = {
                     "Beef": "Largest distribution and highest median land use; represents 22% of meat production, but 37% of all agricultural GHG emissions, suggesting serious gains in both land use and GHG emissions by reducing production and consumption.",
                     "Coffee": "Extremely sensitive to climate. Wet process methods may reduce land use and emissions but compromise on water use.",
@@ -154,7 +180,7 @@ function draw_hist() {
 
                         svg.append('text')
                             .attr('x', width / 2 + margin.left - BrowserText.getWidth('Land Use (m²/kg of product)', 20, 'Helvetica Neue, Arial'))
-                            .attr('y', height)
+                            .attr('y', y(0) + 0.3 * margin.top)
                             .attr('font-family', 'Helvetica Neue, Arial')
                             .attr('font-weight', 700)
                             .attr('font-size', 20)
@@ -175,6 +201,8 @@ function draw_hist() {
                         .attr('font-size', 30)
                         .attr("fill", colorScale(comm))
                         .text(comm);
+
+
 
                     // Plot the area
                     var curve = svg
@@ -197,7 +225,17 @@ function draw_hist() {
                             })
                         ).attr('opacity', 0);
 
+                    var medians = svg.append('circle')
+                        .attr('cx', x(d3.median(indicator)))
+                        .attr('cy', y(graph_ymax * 0.1))
+                        .attr('r', 5)
+                        .attr('fill', 'white')
+                        .attr('stroke', 'black')
+                        .attr('stroke-width', 2)
+                        .attr('opacity', 0)
+
                     curve.transition().duration(300).ease(d3.easeLinear).attr('opacity', 1)
+                    medians.transition().duration(300).ease(d3.easeLinear).attr('opacity', 1)
 
                     comm_num += 1;
                 }
@@ -216,6 +254,8 @@ function clean() {
     // d3.selectAll('.graph-button').remove()
     d3.selectAll('#EntitySelector').remove()
     d3.selectAll('.tooltip').remove()
+    d3.selectAll('.zoom-panel').remove()
+    svg.on('.zoom', null);
 }
 
 //First draw function
@@ -242,58 +282,59 @@ function draw_tree() {
 
 function draw_bar() {
     clean();
+    $('#search').val('');
+    $('input[name="options"]').prop("checked",true);
 
     d3.csv("https://raw.githubusercontent.com/CakeMoon/6.859/main/water_usage.csv").then((data) => {
         // 1. Sort data.
-        WaterUsed = 3413
         data.forEach(d => d.Water = parseInt(d.Water, 10));
-        data.sort((a, b) => b.Water - a.Water);
-        console.log(data);
-        data.forEach((d, i) => d.Entity = `${i + 1}. ${d.Entity}`);
-        const initialData = data.slice(0, 9);
-        console.log(initialData);
-        var WaterUsed;
+        data.sort((a, b) => a.Water - b.Water);
+        data.forEach((d, i) => d.Rank = i + 1);
+        var waterUsed = 0;
+        var selected = [];
 
-        // create the drop down menu of foods
-        var selector = d3.select("#vis")
-            .append("select")
-            .attr("id", "EntitySelector")
-            .selectAll("option")
-            .data(data)
-            .enter().append("option")
-            .text(function (d) {
-                return d.Entity;
-            })
-            .attr("value", function (d, i) {
-                return i;
-            });
-
-        // 2. Setting up variables that describe our chart's space.
-
-        // 3. Create a SVG we will use to make our chart.
+        // 2. Create a SVG we will use to make our chart.
         // See https://developer.mozilla.org/en-US/docs/Web/SVG for more on SVGs.
         const svg = d3.select('#vis').select('svg')
             .attr('width', width)
             .attr('height', height);
 
-        // 4. Setting up scales.
+        // Clippath for zooming
+        svg.append("clipPath")
+            .attr("id", 'my-clip-path')
+            .append("rect")
+                .attr("x", -100)
+                .attr("y", margin.top)
+                .attr("width", width + 100 + margin.left + margin.right)
+                .attr("height", height - margin.top - margin.bottom);
+        
+        svg.append('rect')
+            .attr('class', 'zoom-panel')
+            .attr("x", -100)
+            .attr("y", margin.top)
+            .attr('width', width)
+            .attr('height', height)
+
+        // 3. Setting up scales.
         const xScale = d3.scaleLinear()
-            .domain([0, d3.max(initialData, d => d.Water)])
+            .domain([0, d3.max(data, d => d.Water)])
             .range([margin.left, width - margin.right])
             .nice();
 
         const yScale = d3.scaleBand()
-            .domain(initialData.map(d => d.Entity))
+            .domain(data.map(d => d.Entity))
             .range([height - margin.bottom, margin.top])
             .padding(0.1);
 
+        // 4. Setting up colors.
         const coloring = function (d, selected) {
-            if (d.Entity == selected) {
+            if (selected.includes(d.Entity)) {
                 return '#FF930E';
             }
             return '#1F77B4';
         }
 
+        // 5. Setting up tooltip.
         var tooltip = d3.select("#vis").append("div")
             .attr("class", "tooltip")
             .style("position", "absolute")
@@ -303,18 +344,15 @@ function draw_bar() {
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
         //6. Drawing our x-axis
-        const xAxis = svg.append('g')
-            .attr('transform', `translate(15, ${height - margin.bottom})`)
+        const x = function(g) {
+            g.attr('transform', `translate(15, ${height - margin.bottom})`)
             .call(d3.axisBottom(xScale))
-        // Add x-axis title 'text' element.
-        // .append('text')
-        //     .attr('text-anchor', 'end')
-        //     .attr('fill', 'black')
-        //     .attr('font-size', '12px')
-        //     .attr('font-weight', 'bold')
-        //     .attr('x', width - margin.right)
-        //     .attr('y', -10)
-        //     .text('Water');
+            .call(g => g.select(".domain").remove())
+        }
+    
+        const xAxis = svg.append('g')
+                        .attr("class", "x-axis")
+                        .call(x)
 
         svg.append('text')
         .attr('x', (width + margin.left) / 2)
@@ -327,61 +365,57 @@ function draw_bar() {
         .text('Water Use (L/1000 cal)');
 
 
+
         //7. Drawing our y-axis
+        const y = function(g, yScale) {
+            g.attr('transform', `translate(${margin.left + 15}, 0)`)
+            .call(d3.axisLeft(yScale).ticks(width / 80).tickSizeOuter(0))
+        }
+    
         const yAxis = svg.append('g')
-            .attr('transform', `translate(${margin.left + 15}, 0)`)
-            .call(d3.axisLeft(yScale))
-        // Add y-axis title 'text' element.
-        // .append('text')
-        //     .attr('transform', `translate(20, ${margin.top}) rotate(-90)`)
-        //     .attr('text-anchor', 'end')
-        //     .attr("transform", "rotate(-90)")
-        //     .attr('fill', 'black')
-        //     .attr('font-size', '12px')
-        //     .attr('font-weight', 'bold')
-        //     .text('Entity');
+            .attr("class", "y-axis")
+            .attr('clip-path','url(#my-clip-path)')
+            .call(y, yScale)
 
         svg.append('text')
-        .attr('transform', "rotate(-90)")
-        .attr('x', - ((height - margin.bottom) / 2) -50)
-        .attr('y', 15)
-        .attr('text-anchor', 'middle')
-        .attr('font-family', 'Helvetica Neue, Arial')
-        .attr('font-weight', 700)
-        .attr('font-size', 20)
-        .attr("fill", 'black')
-        .text('Food Commodity');
-
+            .attr('transform', "rotate(-90)")
+            .attr('x', -((height - margin.bottom) / 2) - 50)
+            .attr('y', 15)
+            .attr('text-anchor', 'middle')
+            .attr('font-family', 'Helvetica Neue, Arial')
+            .attr('font-weight', 700)
+            .attr('font-size', 20)
+            .attr("fill", 'black')
+            .text('Food Commodity');
 
         //8.  Adding a background label for the number.
         const numberLabel = svg.append('text')
             .attr("text-anchor", "end")
             .attr('x', width - margin.right)
-            .attr('y', margin.top + 60)
+            .attr('y', height - margin.bottom - 70)
             .attr('fill', '#000000')
             .attr('font-family', 'Helvetica Neue, Arial')
             .attr('font-weight', 700)
             .attr('font-size', 35)
-            .text(WaterUsed);
+            .text(waterUsed);
         const numberContext = svg.append('text')
-        .attr("text-anchor", "end")
-        .attr('x', width - margin.right)
-        .attr('y', margin.top + 110)
-        .attr('fill', '#000000')
-        .attr('font-family', 'Helvetica Neue, Arial')
-        .attr('font-weight', 700)
-        .attr('font-size', 35)
-        .text(WaterUsed);
+            .attr("text-anchor", "end")
+            .attr('x', width - margin.right)
+            .attr('y', height - margin.bottom - 20)
+            .attr('fill', '#000000')
+            .attr('font-family', 'Helvetica Neue, Arial')
+            .attr('font-weight', 700)
+            .attr('font-size', 35)
+            .text(waterUsed);
+
+        // 9. update bars
         const updateBars = function (data, selected) {
             // First update the y-axis domain to match data
-            console.log(data);
             xScale.domain([0, d3.max(data, d => d.Water)]);
             xAxis.transition().duration(1000).call(d3.axisBottom(xScale))
 
             yScale.domain(data.map(d => d.Entity));
             yAxis.transition().duration(1000).call(d3.axisLeft(yScale));
-
-            //xAxisHandleForUpdate.call(xAxis);
 
             const bars = svg
                 .selectAll(".bar")
@@ -390,6 +424,7 @@ function draw_bar() {
             // Add bars for new data
             bars.enter()
                 .append("rect")
+                .attr('clip-path','url(#my-clip-path)')
                 .attr("class", "bar")
                 .attr('x', margin.left + 15)
                 .attr('y', d => yScale(d.Entity))
@@ -397,24 +432,17 @@ function draw_bar() {
                 .attr('height', yScale.bandwidth())
                 .attr('fill', d => coloring(d, selected))
                 .on("mouseover", function (event, d) {
-                    console.log(event.clientX);
-                    console.log(event.clientY);
                     tooltip.transition()
                         .duration(200)
                         .style("opacity", .9);
-                    tooltip.html("Food: " + d.Entity + "<br/> Water: " + d.Water)
-                        .style("left", (event.clientX - 600) + "px")
-                        .style("background", 'white')
+                    tooltip.html("Rank: " + d.Rank + "<br/> Food: " + d.Entity + "<br/> Water: " + d.Water)
+                        .style("left", (event.clientX - 650) + "px")
                         .style("top", (event.clientY) + "px");
-
-                    //.attr("d", symbol.size(64 * 4));
                 })
                 .on("mouseout", function (event, d) {
                     tooltip.transition()
                         .duration(500)
                         .style("opacity", 0);
-
-                    //.attr("d", symbol.size(64));
                 });
 
             // Update old ones, already have x / width from before
@@ -431,42 +459,91 @@ function draw_bar() {
 
             numberLabel
                 .text(WaterUsed + ' L/1000 cal =')
+
                 .transition()
                 .duration(1000)
             numberContext
-                .text(Number((WaterUsed/300).toFixed(2)) + ' bathtubs/meal')
+                .text(Number((waterUsed / 300).toFixed(2)) + ' bathtubs/meal')
                 .transition()
                 .duration(1000)
         };
 
-
-
-
-        const update = function () {
-            const n = data.length;
-            const index = parseInt(d3.select(this).property('value'), 10);
-            var start, end;
-            const selctedEntity = data[index].Entity;
-            WaterUsed = data[index].Water;
-            if (index < 4) {
-                start = 0;
-                end = 9;
-            } else if (index > n - 5) {
-                start = n - 9;
-                end = n;
-            } else {
-                start = index - 4;
-                end = index + 5;
+        // 10. reoder bars
+        const reorder = function () {
+            const type = d3.select(this).property('value');
+            if (type == 'name') {
+                data.sort((a, b) => {
+                    if(a.Entity < b.Entity) { return 1; }
+                    if(a.Entity > b.Entity) { return -1; }
+                    return 0;
+                })
             }
-            const newData = data.slice(start, end);
-            updateBars(newData, selctedEntity);
+            else if (type == 'water') {
+                data.sort((a, b) => a.Water - b.Water);
+            }
+
+            svg.transition()
+            .delay("1000")
+            .duration(750)
+            .call(zoom.transform, d3.zoomIdentity);
+            updateBars(data, selected);
         };
 
-        d3.select("#EntitySelector")
-            .on("change", update);
+        // 11. highlight the searched bars
+        const search = function() {
+            const filter = d3.select(this).property('value').toUpperCase();
+            selected = []
+            data.forEach(d => {
+                if (d.Entity.toUpperCase().indexOf(filter) > -1) {
+                    selected.push(d.Entity)
+                }
+            });
+            if (filter.length == 0) {
+                selected = [];
+            }
 
-        updateBars(initialData);
+            waterUsed = 0
+            data.forEach(d => {
+                if (selected.includes(d.Entity)) {
+                    waterUsed += d.Water;
+                }
+            });
 
+            svg.transition()
+            .duration(750)
+            .call(zoom.transform, d3.zoomIdentity);
+            updateBars(data, selected);
+        }
+
+        d3.selectAll(("input[id='search']"))
+            .on("keyup", search);
+
+        d3.selectAll(("input[name='options']"))
+            .on("change", reorder);
+
+        // 12. zoom function
+        const zoom = d3.zoom()
+            .scaleExtent([1, 32])
+            .extent([[margin.left, 0], [width - margin.right, height - margin.bottom]])
+            .translateExtent([[margin.left, 0], [width - margin.right, height - margin.bottom]])
+            .on("zoom", zoomed);
+    
+        function zoomed(event) {
+            yScale.range([height - margin.bottom, margin.top].map(d => event.transform.applyY(d)));
+            svg.selectAll(".bar").attr("y", d => yScale(d.Entity)).attr("height", yScale.bandwidth());
+            yAxis.call(y, yScale);
+        }
+
+        d3.selectAll(("button[id='reset']"))
+            .on("click", function() {
+                svg.transition()
+                .duration(750)
+                .call(zoom.transform, d3.zoomIdentity);
+            });
+
+        svg.call(zoom);
+
+        updateBars(data, selected);
         document.getElementById("vis").appendChild(svg.node());
     });
 
@@ -486,6 +563,7 @@ function draw_bar() {
 
 
 let activationFunctions = [
+    draw_title,
     draw_tree,
     draw_bar,
     draw_hist,
@@ -711,7 +789,7 @@ function main(o, data) {
             .text(function (d) {
                 return d.key + " (" + formatNumber(d.value) + "\%)";
             })
-           .attr("font-family", "Arial")
+            .attr("font-family", "Arial")
             .call(text2);
 
         g.append("rect")
@@ -733,7 +811,7 @@ function main(o, data) {
             .text(function (d) {
                 return formatNumber(d.value) + "\%";
             })
-           .attr("font-family", "Arial");
+            .attr("font-family", "Arial");
         t.call(text);
 
         g.selectAll("rect")
@@ -827,7 +905,7 @@ function main(o, data) {
 
     function name(d) {
         return d.parent
-         ? name(d.parent) + " / " + d.key + " (" + formatNumber(d.value) + "\%)"
+            ? name(d.parent) + " / " + d.key + " (" + formatNumber(d.value) + "\%)"
             : d.key + " (" + formatNumber(d.value) + "\%)";
     }
 }
