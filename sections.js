@@ -458,7 +458,7 @@ function draw_bar() {
             bars.exit().remove();
 
             numberLabel
-                .text(WaterUsed + ' L/1000 cal =')
+                .text(waterUsed + ' L/1000 cal =')
 
                 .transition()
                 .duration(1000)
