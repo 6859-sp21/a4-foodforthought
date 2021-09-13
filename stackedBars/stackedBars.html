@@ -1,0 +1,32 @@
+<html>
+  <head>
+    <!-- Load d3.js -->
+    <script src="https://d3js.org/d3.v6.js"></script>
+    <style> /* set the CSS */
+      div.tooltip {
+        position: absolute;
+        text-align: center;
+        width: auto;
+        height: auto;
+        padding: 2px;
+        font: 12px sans-serif;
+        /* background: lightsteelblue; */
+        border: 0px;
+        border-radius: 8px;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Bar Chart</h1>
+
+    <div id="chart" style="width:420px;height:420px;">
+      <!-- This is where we will put our chart. -->
+    </div>
+
+    <script src="stackedBars.js"></script>
+  </body>
+
+  <!-- This adapted from Arvind's observable from lecture. https://observablehq.com/d/4c93c3a516d35624 -->
+  <!-- Great D3 intro resource: https://observablehq.com/@d3/learn-d3?collection=@d3/learn-d3 -->
+</html>
